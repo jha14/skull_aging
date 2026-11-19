@@ -1,0 +1,18 @@
+# Raw inputs and local rebuild outputs (published copy lives in docs/)
+data/
+results/
+
+# Local-only templates and large rendered HTML (regenerate / use docs/)
+codes_template/
+codes/bcr_skull_bm.html
+codes/bcr_pre_delivery_review.html
+codes/bcr_pre_delivery_review.qmd
+
+# Rebuilt by package_bcr_delivery.py
+Rplots.pdf
+
+# OS / editor
+.DS_Store
+*.swp
+.env
+.env.*

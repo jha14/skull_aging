@@ -1,0 +1,13 @@
+cluster,cell_subtype,lineage,compare_group,notes
+0,Naive B,Mature B,Naive B,IGHD 64 percent IGHM 89 percent FCER2 74 percent TCL1A 86 percent MS4A1 94 percent; CD27 MME VPREB1 and MKI67 essentially off
+1,Memory B,Mature B,Memory B,MS4A1 96 percent TNFRSF13B 43 percent CD27 34 percent; FCER2 and TCL1A low
+2,Small Pre-B,Precursor,Precursor,RAG1 48 percent RAG2 64 percent VPREB1 59 percent MME 83 percent; MKI67 only 5 percent and MS4A1 off
+3,Plasma,Plasma,Plasma,XBP1 95 percent PRDM1 67 percent SDC1 58 percent MZB1 97 percent; MKI67 3 percent so resting plasma not plasmablast
+4,Immature B,Mature B,Immature B,between small pre-B and naive: MS4A1 50 percent IGHM 75 percent IGHD 31 percent MME 33 percent FCER2 only 17 percent
+5,Large Pre-B,Precursor,Precursor,MKI67 84 percent with VPREB1 84 percent IGLL1 94 percent MME 81 percent; PRDM1 2 percent and SDC1 2 percent so not a plasmablast
+6,Transitional B,Mature B,Transitional B,CD24 73 percent CD38 73 percent IGHM 95 percent IGHD 44 percent TCL1A 94 percent; FCER2 still only 23 percent and MME 43 percent
+7,CD3D+ T,Non-B,Non-B,CD3D in 46 percent; left out of BCR statistics
+8,Cycling precursor,Precursor,Precursor,MKI67 39 percent with DNTT and VPREB1; CD34 only 2 percent and plasma genes low
+9,Pro-B,Precursor,Precursor,CD34 34 percent DNTT 98 percent VPREB1 91 percent; also MKI67 80 percent which is expected for pro-B
+10,Plasma,Plasma,Plasma,PRDM1 68 percent SDC1 45 percent XBP1 78 percent FCRL5 high; MKI67 2 percent
+11,Memory B,Mature B,Memory B,39 cells; MS4A1 with some TNFRSF13B and CD27

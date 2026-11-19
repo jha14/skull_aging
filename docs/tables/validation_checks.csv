@@ -62,8 +62,8 @@ UMAP coordinates agree with the saved embedding,TRUE
 all five UMAP panels use square coordinate ranges,TRUE
 UMAP panels share limits and keep circular points,TRUE
 all comparative figures have traceable test annotations,TRUE
+age tests record the chosen test method,TRUE
 figure annotations agree with final tests: p_value,TRUE
-figure annotations agree with final tests: fdr,TRUE
 figure annotations agree with final tests: n_young,TRUE
 figure annotations agree with final tests: n_old,TRUE
 all nine subtype proportions have age tests,TRUE

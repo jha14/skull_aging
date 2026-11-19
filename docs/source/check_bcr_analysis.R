@@ -159,7 +159,10 @@ ann_idx <- match(ann$test_id, tests$test_id)
 check("all comparative figures have traceable test annotations",
   !anyNA(ann_idx) && !anyDuplicated(ann[c("figure_id", "test_id")]) &&
     setequal(unique(ann$figure_id), c("05", "05s", "06", "07", "07s", "09", "10", "11", "12", "13", "14", "16", "17", "22", "23", "24")))
-for (field in c("p_value", "fdr", "n_young", "n_old")) {
+tested <- !is.na(tests$p_value)
+check("age tests record the chosen test method",
+  all(tests$test_method[tested] %in% c("Welch t-test", "Wilcoxon")))
+for (field in c("p_value", "n_young", "n_old")) {
   check(paste("figure annotations agree with final tests:", field),
     isTRUE(all.equal(ann[[field]], tests[[field]][ann_idx], check.attributes = FALSE, tolerance = 1e-12)))
 }

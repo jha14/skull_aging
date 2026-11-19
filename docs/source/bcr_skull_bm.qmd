@@ -23,9 +23,11 @@ execute:
   message: false
 ---
 
-本报告比较 21 位开颅手术供者的颅骨骨髓：年轻组 10 人（21–32 岁），年老组 11 人（59–77 岁）。组间比较以供者为单位。克隆指同一供者内 IGHV 和重链 CDR3 氨基酸都相同的细胞。
+本报告比较 21 位开颅手术供者的颅骨骨髓 B 细胞：年轻组 10 人（21–32 岁），年老组 11 人（59–77 岁）。BCR 是 B 细胞受体。这里只用每个 B 细胞的一条重链：看它属于哪种细胞、抗体是哪一类、有没有和别的细胞用同一套序列，以及 V 区突变高不高。
 
-目前比较清楚的结果有三条。年老组 B 系细胞中未成熟 B 的比例较低。全库克隆扩增没有明确的年龄差异。IgG 记忆 B 细胞的 V 区突变在年老组更高，值得单独再验证。诊断构成并不均衡，对年龄效应的限定放在文末。
+记忆 B 细胞参与再次应答，浆细胞负责分泌抗体；下文优先汇报这两类细胞。所有年龄比较都是一位供者一个点，不是把每个细胞当成独立样本。细胞类型用英文，与 UMAP 一致。图上的括号是**原始 p**（未做多重校正）；`age_tests.xlsx` 另有按检验 family 的**参考 BH**，正文不据此写成已确认的年龄效应。代码默认折叠，不看代码也可读结果。
+
+这批颅骨骨髓样本里，年老组记忆 B 细胞的重链 V 区突变比例较高；IgG 记忆 B 细胞也有同方向观察，仍需验证。记忆 B 与浆细胞中，年老组扩增细胞比例的中位数多数略高，但两组供者数值重叠，现有结果还不足以确认扩增增强。浆细胞整体突变比例未见明确组间差异。年老组回收到的浆细胞较多，克隆多样性的比较须结合回收深度（见主要结论与图 22、图 14）。年轻组 4/10、年老组 11/11 为动脉瘤相关手术供者，两组原发疾病构成不同；下述为**本队列的年龄组观察与待验证线索**，不是普适衰老机制。
 
 ```{r}
 #| label: setup
@@ -54,6 +56,7 @@ run_preprocessing <- FALSE
 min_bcr_cells <- 30L
 min_subtype_cells <- 10L
 min_donors <- 3L
+normality_alpha <- 0.05
 rarefaction_depths <- c(30L, 50L, 100L)
 n_draws <- 100L
 rarefaction_seed <- 20261114L
@@ -63,6 +66,7 @@ dir.create(fig_dir, recursive = TRUE, showWarnings = FALSE)
 dir.create(tab_dir, recursive = TRUE, showWarnings = FALSE)
 dir.create(rdata_dir, recursive = TRUE, showWarnings = FALSE)
 source(file.path(project_dir, "codes/bcr_helpers.R"))
+options(bcr.normality_alpha = normality_alpha)
 stopifnot(capabilities("cairo"), bcr_font_family %in% systemfonts::system_fonts()$family)
 knitr::opts_chunk$set(dev = "ragg_png", dpi = 144, fig.retina = 2)
 cowplot::set_null_device("agg")
@@ -80,7 +84,16 @@ if (isTRUE(run_preprocessing)) {
 
 ## 样本和细胞标签
 
-年龄只取颅骨骨髓。下图用发育标志核对亚型：初始 B 带有 IGHD、IGHM 和 CD23，记忆 B 表达 CD27，浆细胞表达 XBP1、PRDM1 和 SDC1。增殖并高表达 VPREB1、IGLL1 的群体标为 large pre-B。
+这一节先确认比的是谁，以及图上的细胞名称是什么意思。年龄和分组只用颅骨骨髓。21 位供者里，年轻组 10 人（21–32 岁），年老组 11 人（59–77 岁）。两组的原发疾病不均衡，文末一起说明。
+
+细胞名称和图上的英文标签一致：
+
+- Pro-B、Large Pre-B、Small Pre-B：骨髓里较早的 B 细胞前体。Large Pre-B 是其中正在增殖、并表达 VPREB1、IGLL1 的一群，不是 plasmablast。
+- Immature B、Transitional B：已经形成但尚未成熟的 B 细胞。
+- Naive B：成熟、尚未经历抗原反应的 B 细胞，通常带 IgM 或 IgD，V 区突变很少。
+- Memory B：记忆 B 细胞，表达 CD27，可以出现抗体类别转换和 V 区突变。
+- Plasma：浆细胞，表达 XBP1、PRDM1 和 SDC1，负责分泌抗体。
+- CD3D+ T：混入的 T 细胞，后面的 B 细胞分析不包括它们。
 
 ```{r}
 #| label: design
@@ -115,7 +128,7 @@ write_xlsx(list(donors = sample_info, design = design_table), "study_design")
 design_table
 ```
 
-21 位供者来自开颅手术中取得的颅骨骨髓，年轻组 10 人（21–32 岁），年老组 11 人（59–77 岁）。两组的原发疾病并不均衡，这一点放在文末一起说明。
+21 位供者的年龄、性别和短编号见上面的表。图里的 Y1–Y10、O1–O11 就是这张表里的顺序。
 
 ```{r}
 #| label: labels-and-markers
@@ -148,6 +161,8 @@ p_dot <- DotPlot(obj, features = markers, group.by = "cell_subtype", cols = c("g
 save_plot(p_dot, "01_marker_dotplot", 7.2, 5.6)
 print(p_dot)
 ```
+
+图 01. 每个点对应一种细胞类型与一个基因。点的大小表示**表达该基因的细胞比例**；颜色表示标准化表达量（越深越高）。用它核对细胞命名：Naive B 应有 IGHD、IGHM 和 CD23，Memory B 应有 CD27，Plasma 应有 XBP1、PRDM1 和 SDC1。
 
 ```{r}
 #| label: umap-subtype
@@ -188,11 +203,13 @@ save_plot(p_umap, "02_umap_subtype", 4.6, 4.6)
 print(p_umap)
 ```
 
-亚型是根据经典发育标志在现有聚类上标定的。初始 B 细胞同时表达 IGHD、IGHM、CD23 和 MS4A1；记忆 B 细胞表达 CD27 和 TNFRSF13B；浆细胞表达 XBP1、PRDM1 和 SDC1。增殖并带有 VPREB1 的群体标为 large pre-B，而不是浆母细胞。
+图 02. 每个点是一个细胞。距离近表示基因表达相似，不是实验测到的物理距离。颜色是上面的细胞类型，灰色是 CD3D+ T，后面不再使用。
 
 ## 重链选择
 
-同种型和 V 基因来自同一条 productive IGH contig 的原始列。每条细胞保留 reads 最高的一条重链；并列时再比 UMI 和 contig id。同一 V(D)J 的 IgM 和 IgD 转录本只算一种重排。缺失的 constant gene 保持缺失，不从 D 基因名里推断 IgD。
+一个 B 细胞有时能测到不止一条重链。后面所有分析每个细胞只保留一条：能正常翻译、reads 最高的那条；reads 相同时再看 UMI 和 contig 编号。V 基因、J 基因、抗体类别和 CDR3 都来自这一条。
+
+抗体类别由恒定区决定：IgM、IgD、IgG、IgA、IgE。测不到恒定区时就空着，不从别的基因名去猜，这些细胞不参加类别转换的统计。同一套 V(D)J 同时有 IgM 和 IgD 转录本时，只算一种重排。
 
 ```{r}
 #| label: select-chains
@@ -249,11 +266,13 @@ write_xlsx(list(flow = flow, donors = analysis %>% count(sample_id, age_group, n
 flow
 ```
 
-共有 `r nrow(analysis)` 个 B 系细胞带有可用重链，其中 IgD `r sum(analysis$c_gene == "IGHD", na.rm = TRUE)` 个。每条细胞保留 reads 最高的一条重链，V、J、C 和 CDR3 都来自这条序列。恒定区缺失的细胞不计入类别转换。
+最后进入分析的 B 系细胞有 `r nrow(analysis)` 个，其中 IgD `r sum(analysis$c_gene == "IGHD", na.rm = TRUE)` 个。上面的表是从全部细胞到这条重链的筛选计数，用来核对有没有在中途丢掉一大批细胞。
 
 ## 回收率
 
-下图给出每位供者中，带有重链的 B 系细胞比例。`MY_SkullBM_240304` 只有十几个可用重链，因此不进入需要至少 30 个重链细胞的比较。
+这一节看每个供者有多少 B 细胞真正测到了重链。柱高是百分比：有重链的 B 细胞，除以该供者全部 B 细胞。百分比高，只说明测到的比例高，不说明条数够做克隆比较。
+
+克隆、多样性和突变要求至少 30 条重链。`MY_SkullBM_240304`（Y6）的柱子是 40%，但只有 16/40 条，所以不进入这些比较。其余供者都超过 145 条，全部保留。亚型比例用的是全部 B 细胞，这一位供者仍然保留。
 
 ```{r}
 #| label: recovery
@@ -290,15 +309,17 @@ p_rec <- b_den %>%
   theme(axis.text.x = element_text(size = 7), legend.position = "bottom") +
   labs(x = NULL, y = "B cells with heavy chain (%)", title = "Heavy-chain recovery")
 save_plot(p_rec, "03_b_lineage_recovery", 7.2, 3.6)
-print(p_rec)
 b_den %>% select(sample_id, age_group, n_gex_b, n_igh_b, recovery, include_library, exclude_reason)
+print(p_rec)
 ```
+
+图 03. 每根柱是一位供者。柱高是有重链的 B 细胞占该供者全部 B 细胞的百分比。Y6 的柱子是 40%，但表里只有 16 条重链，少于 30 条，所以不进入后面的克隆、多样性和突变比较。
 
 ## 亚型比例
 
-组间图上的括号是双侧 Wilcoxon 的原始 P。正文里若同时比较多项，结论参考各检验家族内的 BH。供体数和效应量写在对应 Excel 里。
+这一节看每种 B 细胞占该供者 B 细胞的百分比，每个点或每根柱里的一份都是一位供者。
 
-年老供者的未成熟 B 细胞比例较低。这个变化出现在进入滤泡成熟之前的阶段，提示颅骨骨髓里早期 B 细胞的构成随年龄改变。过渡 B 细胞也偏低，但校正后没有达到同一阈值。未成熟和过渡阶段的界限并不绝对，合并后的比较放在补充统计里。
+后面带括号的箱线图采用同一探索性规则：对年轻、年老两组供者数值分别做 Shapiro–Wilk（α = 0.05）；**仅当两组均未拒绝正态**时用 Welch t（比较供者**均值**），否则用 Wilcoxon。正文和表中报告的年轻→年老数字是供者**中位数**，用于描述分布，与 t 检验的目标量不同。小样本下 Shapiro 不显著只表示未检出偏离正态。图上括号为**原始 p**；导出表按 `family` 计算参考 BH。供者少于 3 的组不检验。原始 p < 0.05 记为**探索性信号**，不表述为确认的年龄效应或“不像偶然差别”。
 
 ```{r}
 #| label: abundance
@@ -348,6 +369,8 @@ stat_tests[[length(stat_tests) + 1]] <- wilcox_age(
 )
 ```
 
+图 04. 每位供者一根柱，颜色是细胞类型，加起来是 100%。这张图看整体组成，不做检验。
+
 ```{r}
 #| label: abundance-comparison
 #| fig-width: 5.2
@@ -372,10 +395,24 @@ p_frac_rest <- annotate_age_plot(p_frac_rest, subtype_grid %>% filter(cell_subty
   facets = "cell_subtype")
 save_plot(p_frac, "05_subtype_fraction_by_age", 5.2, 2.2)
 print(p_frac)
+abundance_bh <- adjust_tests(abundance_plot_tests %>% filter(family == "abundance"))
 
 ```
 
-图 05. 每个点是一位供者，纵轴是该亚型占该供者 B 系细胞的比例。年老组未成熟 B 的比例较低。
+```{r}
+#| label: fig-05-caption
+#| echo: false
+#| results: asis
+
+cat(
+  "图 05. 每个点是一位供者，纵轴是该细胞类型占该供者 B 细胞的百分比。本分面含 Immature B、Transitional B 与 Plasma。",
+  subtype_fraction_blurb(abundance_bh, "Immature B"),
+  subtype_fraction_blurb(abundance_bh, "Transitional B"),
+  subtype_fraction_blurb(abundance_bh, "Plasma"),
+  "浆细胞（Plasma）比例见本图；记忆 B（Memory B）比例见图 05s 与主要结论表。Immature 与 Transitional 分界并不绝对；合并 Immature+Transitional 的敏感性分析见 age_tests（family = abundance_sensitivity）。",
+  sep = " "
+)
+```
 
 ```{r}
 #| label: abundance-supplement
@@ -387,13 +424,26 @@ print(p_frac_rest)
 
 ```
 
-图 05s. 其余亚型的供者比例，读法和图 05 相同。
+```{r}
+#| label: fig-05s-caption
+#| echo: false
+#| results: asis
+
+cat(
+  "图 05s. 每个点是一位供者，纵轴为占该供者 B 系细胞的百分比；读法与图 05 相同（图括号为原始 p，同类检验参考 BH 见图注句式与 age_tests）。",
+  subtype_fraction_blurb(abundance_bh, "Memory B"),
+  "其余分面（Naive B、Pro-B 等）供描述性比较；浆细胞比例见图 05。",
+  sep = " "
+)
+```
 
 
 
-## 操作性克隆
+## 克隆
 
-克隆按同一供者内相同的 IGHV 和完全相同的重链 CDR3 氨基酸计算。在目前采到的细胞里，年轻和年老组的总体扩增比例没有明确差别；把初始 B、记忆 B 和浆细胞分开看，也没有形成一个稳定的年龄差异。细胞数较少的供者不参与这项比较。
+这一节只回答一件事：年老组里，属于扩增克隆的细胞是不是更多。
+
+做法：克隆只在同一供者内部计算。IGHV 相同，并且重链 CDR3 氨基酸完全相同，算同一个克隆。不跨供者合并，也不做序列相似度聚类。一个克隆在当前统计范围内至少有 2 个细胞，其中的细胞就算扩增细胞。重链不足 30 条的供者不进入；某个亚型不足 10 个重链细胞的供者，不进入该亚型。
 
 ```{r}
 #| label: clones
@@ -469,6 +519,8 @@ save_plot(p_exp, "06_expanded_fraction_all", 1.85, 2.15)
 print(p_exp)
 ```
 
+图 06. 每个点是一位供者。纵轴是全部 B 系重链细胞中，扩增细胞占的百分比。结论：年轻和年老组没有明确差别。
+
 ```{r}
 #| label: clone-subtype-comparison
 #| fig-width: 5.2
@@ -502,7 +554,7 @@ print(p_exp_sub)
 
 ```
 
-图 07. 每个点是一位供者。扩增按该亚型内部重新计算的克隆大小，不是全库克隆大小。
+图 07. 每个点仍是一位供者，但分母和克隆大小都只在该亚型内部计算。例如一个克隆有 1 个 Memory B 和 1 个 Plasma，这个 Memory B 细胞在本图里不算扩增。结论：Naive B、Memory B、Plasma 都没有 p < 0.05。Memory B 的供者中位数是 0 对 3.4%（p = 0.13），Plasma 是 6.5% 对 12.5%（p = 0.20）。这张图不是后面的 STARTRAC。
 
 ```{r}
 #| label: clone-subtype-supplement
@@ -514,11 +566,9 @@ print(p_exp_rest)
 write_xlsx(list(by_definition = clone_tables, by_subtype = subtype_summary), "clone_metrics")
 ```
 
-图 07s. 其余亚型的亚型内扩增比例。供体太少的分面只有点，没有检验。
+图 07s. 其余亚型的亚型内扩增比例，读法和图 07 相同。供者太少的分面只有点，没有检验。
 
-
-
-克隆大小按同一供者内的细胞数分成 1、2 和大于 2。图 18 是每位供者自己的构成，横轴是短编号。图 19 把同一年龄组里每位供者的比例取平均，每位供者权重相同。图 20 的甜甜圈用的是全库克隆大小，再按亚型汇总，不是图 07 那种在亚型内部重算的大小。图 21 只看已经扩增的细胞落在哪些亚型。
+下面四张图不再做组间检验，只展示克隆大小的构成。克隆大小按同一供者内的细胞数分成 =1、=2 和 >2。
 
 ```{r}
 #| label: clone-size-composition
@@ -557,6 +607,8 @@ write_fig_xlsx("18_clone_size_by_donor", donor_bins, NULL,
   tibble(item = "clone size", value = "repertoire clone_size: =1, =2, >2"))
 ```
 
+图 18. 每位合格供者一根柱，三种颜色分别是克隆大小 =1、=2、>2 的细胞比例，加起来是 100%。横轴是供者短编号。多数细胞落在 =1，也就是没有扩增。
+
 ```{r}
 #| label: clone-homeostasis
 #| fig-width: 1.95
@@ -584,6 +636,8 @@ write_fig_xlsx("19_clone_homeostasis", homeostasis, NULL,
   tibble(item = "weighting", value = "each eligible donor contributes equally"))
 write_xlsx(list(by_donor = donor_bins, age_mean = homeostasis), "clone_size_bins")
 ```
+
+图 19. 把图 18 里同一年龄组的供者比例取平均，每位供者权重相同。两组的构成接近，年老组并没有变成以大克隆为主。
 
 ```{r}
 #| label: clone-size-donuts
@@ -625,7 +679,7 @@ write_fig_xlsx("20_clone_size_donuts", subtype_bins, NULL,
     value = c("repertoire clone_size grouped by subtype", min_subtype_cells)))
 ```
 
-扩增细胞是克隆大小至少为 2 的细胞。下面两个环分别是年轻组和年老组：每位有扩增细胞的供者先算各亚型占比，再在组内取平均。环上扇区越大，这个亚型贡献的扩增细胞越多。
+图 20. 每个环是一个亚型，颜色仍是克隆大小 =1、=2、>2。这里用的是全库克隆大小，再按亚型汇总，不是图 07 那种在亚型内部重新数的大小。各亚型仍以 =1 为主。
 
 ```{r}
 #| label: expanded-subtype-donuts
@@ -667,9 +721,11 @@ write_fig_xlsx("21_expanded_subtype_donuts", expanded_mix, NULL,
 write_xlsx(list(subtype_clone_size = subtype_bins, expanded_by_subtype = expanded_mix), "clone_composition_donuts")
 ```
 
+图 21. 只保留克隆大小至少为 2 的细胞，看它们落在哪些亚型。左右两个环是年轻组和年老组：先在每位有扩增细胞的供者内算亚型占比，再对供者取平均。这张图描述扩增细胞来自哪些亚型，不做年龄检验。
+
 ## 克隆多样性
 
-Gini–Simpson 用同一套克隆计算，越接近 1 表示克隆越分散。两组都接近 1，因为大多数细胞仍是单个克隆，校正后没有稳定的年龄差异。它和 Shannon 不是同一个指数；Shannon 还明显受每个供者细胞数影响。
+这一节用和图 06 相同的克隆，看克隆有多分散，不看扩增细胞百分比。Gini–Simpson 的范围是 0 到 1，不是 Inverse Simpson。Inverse Simpson 是有效克隆数，没有 1 这个上限。
 
 ```{r}
 #| label: diversity
@@ -709,9 +765,11 @@ write_fig_xlsx("22_gini", gini_plot, statistics_from_plot(p_gini),
 write_xlsx(diversity_donor, "diversity")
 ```
 
+图 22. 每个点是一位供者，纵轴是 Gini–Simpson（`1 - sum(p²)`，基于该供者克隆频率 \(p\)）。越接近 1，克隆越分散；若 \(N\) 个细胞各属不同克隆，指数为 `1 - 1/N`。Memory B 未见一致组间差异；Plasma 的点须结合该供者回收的浆细胞数解读（进入比较的供者，可定义克隆的浆细胞数中位数年轻约 31、年老约 91）。看扩增比例请用图 06、图 07。
+
 ## 亚型内扩增和亚型间转换
 
-扩增指数看一个亚型是不是被少数克隆占据。下一张是亚型间的克隆共享，对应 STARTRAC 的 tran，不表示转换方向或速度。只有颅骨骨髓，没有组织迁移指数。一个亚型里少于 10 个有克隆的细胞时，该供者不进入。校正后这两项都没有稳定的年龄差异。
+这一节是 STARTRAC，和前面的扩增细胞百分比不是同一个量。某个亚型里少于 10 个能定义克隆的细胞时，该供者不进入。年龄比较仍以图 06 和图 07 为准。
 
 ```{r}
 #| label: startrac
@@ -747,6 +805,17 @@ p_expa <- annotate_age_plot(
     metric = paste0("STARTRAC expansion, ", star_levels)),
   facets = "cell_subtype"
 )
+save_plot(p_expa, "23_startrac_expansion", 5.3, 4.3)
+print(p_expa)
+```
+
+图 23. 每个点是一位供者，纵轴是 STARTRAC 的 expansion。它看细胞是不是集中在少数克隆上，不是扩增细胞的百分比。Memory B 的中位数是 0 对 0.0014（p = 0.065），差值很小，不能当成扩增增强。两项都没有 p < 0.05。
+
+```{r}
+#| label: startrac-transition
+#| fig-width: 5.3
+#| fig-height: 4.3
+
 p_tran <- plot_age_box(startrac_donor, "tran", "Sharing index", "Clonal sharing", "cell_subtype")
 p_tran <- annotate_age_plot(
   p_tran, startrac_donor, "tran", collect_age_tests(stat_tests),
@@ -754,24 +823,24 @@ p_tran <- annotate_age_plot(
     metric = paste0("STARTRAC transition, ", star_levels)),
   facets = "cell_subtype"
 )
-save_plot(p_expa, "23_startrac_expansion", 5.3, 4.3)
-print(p_expa)
 save_plot(p_tran, "23_startrac_transition", 5.3, 4.3)
 print(p_tran)
 write_fig_xlsx("23_startrac_expansion", startrac_donor, statistics_from_plot(p_expa),
   tibble(field = c("sample_id", "cell_subtype", "expa", "tran", "n_cells"),
-    meaning = c("供者", "亚型", "STARTRAC 扩增指数", "STARTRAC 转换指数，表示亚型间共享", "该亚型有克隆键的细胞数")),
+    meaning = c("供者", "亚型", "STARTRAC 扩增指数", "STARTRAC 转换指数，表示亚型间共享", "该亚型中能定义克隆的细胞数")),
   tibble(item = "min_subtype_cells", value = min_subtype_cells))
 write_fig_xlsx("23_startrac_transition", startrac_donor, statistics_from_plot(p_tran),
   tibble(field = c("sample_id", "cell_subtype", "expa", "tran", "n_cells"),
-    meaning = c("供者", "亚型", "STARTRAC 扩增指数", "亚型间克隆共享指数", "该亚型有克隆键的细胞数")),
+    meaning = c("供者", "亚型", "STARTRAC 扩增指数", "亚型间克隆共享指数", "该亚型中能定义克隆的细胞数")),
   tibble(item = "min_subtype_cells", value = min_subtype_cells))
 write_xlsx(startrac_donor, "startrac")
 ```
 
+图 24. 每个点是一位供者，纵轴是同一个克隆是否出现在不同细胞类型里。它不表示转换方向，也不作为年龄结论。
+
 ## 同种型
 
-比例的分母是已知恒定区的细胞。初始 B 细胞以 IgM 为主，年老组的 IgM 比例略低、类别转换略高。记忆 B 和浆细胞则以 IgG、IgA 为主。同种型内部的扩增按该同种型自己的克隆大小计算；一个克隆里各有一个 IgM 和一个 IgG 细胞时，不算作同种型内扩增。
+这一节看抗体类别。class-switched 只包括 IgG、IgA 和 IgE。IgM 和 IgD 不算转换。分母是恒定区已知的细胞。
 
 ```{r}
 #| label: isotype
@@ -859,6 +928,8 @@ save_plot(p_iso, "08_isotype_by_subtype", 7.2, 3.8)
 print(p_iso)
 ```
 
+图 08. 所有供者的细胞合在一起。每个柱是一个亚型，颜色是抗体类别。Naive B 以 IgM 为主，Memory B 和 Plasma 以 IgG、IgA 为主。这张图描述构成，不做年龄检验。
+
 ```{r}
 #| label: switched-comparison
 #| fig-width: 5.2
@@ -874,6 +945,15 @@ p_sw <- annotate_age_plot(p_sw, iso_sub %>% filter(cell_subtype %in% main_subtyp
   facets = "cell_subtype")
 save_plot(p_sw, "09_switched_by_main_subtype", 5.2, 2.2)
 print(p_sw)
+
+```
+
+图 09. 每个点是一位供者，纵轴是该亚型里 class-switched 细胞的百分比。Naive B 年轻组中位数是 0，年老组约 1%（p = 0.013）。这不能解释成 Naive B 在做类别转换：全部 Naive B 里只有 11 个 IgG 和 6 个 IgA，更像是少量已转换细胞落在 Naive B 聚类里。Memory B 约 44% 对 48%（p = 0.51），Plasma 约 97% 对 95%（p = 0.36），这两处没有年龄差异。
+
+```{r}
+#| label: switched-export
+#| include: false
+#| echo: false
 write_xlsx(list(
   unknown = iso_unknown, by_donor = iso_donor, by_subtype = iso_sub, within_isotype = iso_exp
 ), "isotype")
@@ -881,7 +961,9 @@ write_xlsx(list(
 
 ## V 基因
 
-V 基因使用率同时按细胞和按克隆计算。没有观察到的基因，在细胞数足够的供者里记为 0。IGHV4-59 在全库的细胞加权比较中年老组更高；换成每个克隆一票之后方向相同，校正后不再突出。放到初始 B、记忆 B 和浆细胞内部再比，没有看到明确的组间差异。
+这一节看 B 细胞使用哪些 V 基因，是不是年老组偏向某几个基因。每个供者先计算一个 V 基因占该供者重链的百分比，没有测到的基因记为 0，再比较年轻和年老。图上只画平均使用率最高的 15 个基因，每个点是一位供者。
+
+按细胞计数时，IGHV4-59 在年老组更高。改成每个克隆只算一票后，方向相同，但 p 值更大。再放到 Naive B、Memory B 和 Plasma 里面分别比较，没有看到稳定的年龄差异。所以它只是一个全库层面的线索，不能说某种细胞的 V 基因使用发生了改变。
 
 ```{r}
 #| label: vgene
@@ -954,11 +1036,13 @@ print(p_v)
 write_xlsx(list(cell_weighted = v_cell, clone_weighted = v_clone), "ighv_usage")
 ```
 
+图 10. 横轴是该 V 基因占供者重链细胞的百分比，每个点一位供者。括号是年轻组和年老组这一个基因的 p 值。阅读时以 IGHV4-59 为主，其余基因没有形成一致的年龄差异。
+
 ## 体细胞高频突变
 
-年老组记忆 B 细胞的 V 区突变中位数高于年轻组。把初始 B、记忆 B 和浆细胞放在同一族检验里校正后，这一总体比较没有越过设定阈值。IgG 记忆 B 细胞里年老组仍然更高，两组各有 8 位供者，适合作为后续关注的分层线索，而不是所有抗体类别共同的现象。IgM 和 IgA 记忆 B 细胞没有同样的差别。
+相对未重排的种系 V 区参考，SHM 报告为 IGHV 区碱基差异比例（%）。图上每一位供者先在该亚型内取细胞突变率的中位数，再作组间比较。它描述序列变化，不代表抗体亲和力或分泌量。突变百分比来自所选重链的 IGHV 区（IMGT V 区、种系比对），不算 CDR3，也不是整条重链；对不上所选重链的细胞不进入。
 
-突变频率来自所选重链与种系序列在 IMGT V 区的比较，沿用已经算好的比对结果。对不上所选重链的细胞记为缺失。
+IgD 的突变已经算过，共 302 个细胞，总体中位数是 0。Memory B 里只有 32 个 IgD，多数供者只有 1–2 个，达不到每供者 10 个细胞，所以没有单独的 IgD 图。分同种型的图只保留 IgM、IgG 和 IgA。
 
 ```{r}
 #| label: shm
@@ -1094,6 +1178,15 @@ p_shm <- annotate_age_plot(p_shm, shm_cell %>% filter(cell_subtype %in% main_sub
     metric = paste0("Cell-median SHM, ", main_subtypes)), facets = "cell_subtype")
 save_plot(p_shm, "11_shm_main_subtypes", 5.2, 2.2)
 print(p_shm)
+```
+
+图 11. 每个点是一位供者，纵轴是该亚型细胞的 IGHV 区突变中位数。Memory B 年老组供者中位数约 4.51%→5.21%（Welch，原始 p≈0.0085；`shm_cell` 家族参考 BH≈0.026），记为探索性信号。Naive B 两组中位数均为 0。Plasma 约 9.38%→9.67%（原始 p≈0.40），未见明确组间差异。
+
+```{r}
+#| label: shm-memory-isotype
+#| fig-width: 5.2
+#| fig-height: 2.2
+
 p_mem <- plot_age_box(
   memory_iso %>% filter(isotype_group %in% c("IGHM", "IGHG", "IGHA")),
   "median_mu", "V-region mutation (%)", "Memory B", "isotype_group"
@@ -1111,9 +1204,13 @@ write_xlsx(list(
 ), "shm")
 ```
 
+图 12. 只看 Memory B，再按 IgM、IgG、IgA 分开。IgG 层约 6.39%→7.49%（原始 p≈0.029，参考 BH≈0.087；各 8 位供者），作为后续验证线索。IgM、IgA 分层未见与 IgG 同强度的组间差异。
+
 ## 共享克隆和抗原序列
 
-这一部分看两件事：不同供者是否带有相同的重链，以及这些重链是否与已知抗体的重链序列相同。比对使用 CoV-AbDab 和 IEDB 的人源 BCR 导出。序列相同只作为候选，不能说明这株抗体能够结合相应抗原。
+这一节回答两个具体问题。第一，不同供者之间有没有完全相同的重链。第二，这些重链是否和公共数据库里已经记录的抗体相同。
+
+比对规则很窄：IGHV 基因相同，并且 CDR3 氨基酸完全相同，才算命中。不是整条抗体序列，也不能说明这个细胞真的结合数据库里写的抗原。用的库是 CoV-AbDab 和 IEDB 里的人源重链。
 
 ```{r}
 #| label: public-antigen
@@ -1226,7 +1323,7 @@ if (nrow(antigen_hits)) {
 antigen_qc
 ```
 
-我们将 `r nrow(query)` 个细胞的合格重链分别与 CoV-AbDab 和 IEDB 比对，比较的是同一 IGHV 加相同的 CDR3 氨基酸，不是整条重链序列。两个库都没有这样的记录，合计命中细胞 `r antigen_qc$n_hit_cells` 个。供者之间完全相同的重链是 `r nrow(exact_public)` 条，CDR3 相差一个氨基酸的跨供者配对是 `r nrow(near_public)` 对。
+结论：`r nrow(query)` 条合格重链在两个库里都没有**同一 IGHV 且 CDR3 氨基酸完全相同**的命中，命中细胞 `r antigen_qc$n_hit_cells` 个。这不能推断这些 B 细胞没有抗原特异性。供者之间 IGHV+CDR3 氨基酸完全相同的有 `r nrow(exact_public)` 条；CDR3 仅差一个氨基酸的跨供者配对有 `r nrow(near_public)` 对。
 
 ```{r}
 #| label: antigen-summary
@@ -1240,40 +1337,67 @@ antigen_by_db
 
 tests <- bind_rows(stat_tests)
 tests <- tests[!duplicated(tests$test_id), ]
-tests <- tests %>% adjust_tests()
-primary_hits <- tests %>% filter(family %in% c("abundance", "expansion", "isotype", "shm_cell"), !is.na(p_value), p_value < 0.05)
+tests <- adjust_tests(tests)
+primary_hits <- tests %>%
+  filter(family %in% c("abundance", "expansion", "isotype", "shm_cell"), !is.na(p_value), p_value < 0.05)
 write_xlsx(list(tests = tests, primary_raw = primary_hits), "age_tests")
 ```
 
 ## 主要结论
 
-下表是本队列里需要直接看的比较。比例已换成百分数。
+下表按 **Memory B** 与 **Plasma** 并列列出组成、扩增、SHM 与多样性指标，并附 **Immature B 比例**（早期组成）与全库扩增对照。数值均为年轻→年老的供者中位数；比例为占 B 系细胞的百分比，不是绝对细胞数。图括号为原始 p；表中另给同 `family` 的参考 BH。原始 p < 0.05 仅作探索性信号。更完整的 182 项比较见 `age_tests.xlsx`。
+
+**Memory B**  
+占 B 系细胞比例 12.44%→21.64%（图 05s，Young/Old n=10/11，原始 p=0.256）——方向与年老组略高一致，但证据不足，宜作待验证线索。亚型内扩增细胞比例 0%→3.45%（图 07，n=9/11，p=0.130）；不足以确认扩增增强。V 区突变 4.51%→5.21%（图 11，原始 p=0.0085，参考 BH=0.026），为本轮优先汇报的探索性信号。IgG 分层 6.39%→7.49%（图 12，各 8 名供者，p=0.029，参考 BH=0.087），宜作验证线索。Gini–Simpson（p=0.879）与 Shannon（p=0.903）未见一致组间差异。
+
+**Plasma**  
+占 B 系细胞比例 5.55%→19.96%（**图 05** Plasma 分面，n=10/11，p=0.113）——比例变化不能等同绝对细胞数；待更大样本验证。亚型内扩增 6.45%→12.52%（图 07，n=9/10，p=0.202），与记忆 B 类似，中位数略高但重叠大。整体 V 区突变 9.38%→9.67%（图 11，p=0.396）；IgG/IgA 分层亦无明确差异（图 17）。Gini–Simpson 0.954→0.983（图 22，p=0.079）；Shannon（图 14，p=0.112）与 Plasma Top10（p=0.094；**图 13 为全 B 系**，不宜混用）受**回收深度**影响——进入比较的供者中，可定义克隆的浆细胞数中位数年轻约 31、年老约 91。类别转换（switched_frac，p≈0.36）未见稳定差异。
+
+**组成与其他**  
+Immature B 比例 11.87%→4.29%（Wilcoxon，原始 p≈0.0028，abundance BH≈0.025）为组成观察。Transitional B 9.79%→5.04%（年老偏低；Welch 原始 p≈0.015，abundance BH≈0.069），与图 05 括号及图注一致。全库扩增细胞比例无稳定差异；STARTRAC 不作扩增结论。公共库无 IGHV+CDR3 完全相同命中。
 
 ```{r}
 #| label: result-summary
 summary_specs <- tibble(
-  family = c("abundance", "expansion", "shm_cell", "shm_memory_isotype", "v_gene_cell", "v_gene_clone"),
-  metric = c("Subtype fraction, Immature B", "All B-lineage heavy chains; primary; expanded_frac",
+  亚型 = c(
+    rep("Memory B", 6), rep("Plasma", 5), "早期组成", "全库对照", "早期组成"
+  ),
+  family = c(
+    "abundance", "expansion", "shm_cell", "shm_memory_isotype", "diversity", "expansion",
+    "abundance", "expansion", "shm_cell", "diversity", "expansion",
+    "abundance", "expansion", "abundance"
+  ),
+  metric = c(
+    "Subtype fraction, Memory B", "Memory B; primary; expanded_frac",
     "Cell-median SHM, Memory B", "Memory SHM within IGHG",
-    "Cell-weighted IGHV, IGHV4-59", "Clone-weighted IGHV, IGHV4-59"),
-  label = c("Immature B 比例 (%)", "全 B 系重链扩增比例 (%)", "Memory B SHM (%)",
-    "Memory B IgG SHM (%)", "IGHV4-59 细胞加权 (%)", "IGHV4-59 克隆等权 (%)"),
-  multiplier = c(100, 100, 1, 1, 1, 1)
+    "Gini-Simpson, Memory B", "Memory B; primary; shannon",
+    "Subtype fraction, Plasma", "Plasma; primary; expanded_frac",
+    "Cell-median SHM, Plasma", "Gini-Simpson, Plasma", "Plasma; primary; shannon",
+    "Subtype fraction, Immature B", "All B-lineage heavy chains; primary; expanded_frac",
+    "Subtype fraction, Transitional B"
+  ),
+  label = c(
+    "占 B 系细胞比例 (%)", "扩增细胞比例 (%)", "V 区突变 (%)", "IgG 层 V 区突变 (%)",
+    "Gini–Simpson", "Shannon",
+    "占 B 系细胞比例 (%)", "扩增细胞比例 (%)", "V 区突变 (%)", "Gini–Simpson", "Shannon",
+    "Immature B 比例 (%)", "全 B 系扩增比例 (%)", "Transitional B 比例 (%)"
+  ),
+  multiplier = c(100, 100, 1, 1, 1, 1, 100, 100, 1, 1, 1, 100, 100, 100)
 )
-summary_table <- summary_specs %>% left_join(tests, by = c("family", "metric")) %>%
-  transmute(指标 = label, Young供体数 = n_young, Old供体数 = n_old,
+summary_table <- summary_specs %>%
+  left_join(tests, by = c("family", "metric")) %>%
+  transmute(
+    亚型, 指标 = label, Young_n = n_young, Old_n = n_old,
     Young中位数 = median_young * multiplier, Old中位数 = median_old * multiplier,
-    差值_Old减Young = median_difference_old_minus_young * multiplier, p = p_value, BH = fdr)
+    差值_Old减Young = median_difference_old_minus_young * multiplier,
+    检验 = test_method, 原始p = p_value, 参考BH = p_bh
+  )
 knitr::kable(summary_table, digits = 4)
 ```
 
-年老组 B 系细胞中，未成熟 B 的比例较低，供者中位数约从 11.9% 降到 4.3%。全库克隆扩增没有明确的年龄差异。全库 IGHV4-59 使用率在年老组更高；换成每个克隆一票后不再突出。IgG 记忆 B 细胞的 V 区突变也更高，两组各有 8 位供者，适合作为后续验证的分层线索。Gini–Simpson 和 STARTRAC 校正后没有稳定的年龄差异。CoV-AbDab 和 IEDB 都没有同一 IGHV 且 CDR3 氨基酸相同的记录。
-
-这些结果不能写成年老组克隆扩增普遍增强，也不能推断没有抗原特异性。年轻组 4/10、年老组 11/11 来自动脉瘤相关手术，两组各有 2 名男性，32 岁到 59 岁之间没有供者。Shannon 还明显受每个供者重链细胞数影响，等深度比较留到后面再做。
-
 ## 附录：结果文件 {.unnumbered}
 
-细胞表和 Seurat 对象在这里保存，供核对。每个供者的每个克隆只占一行。
+下面保存细胞表和 Seurat 对象，用来核对，不是给阅读结论用的。每个供者的每个克隆只占一行。
 
 ```{r}
 #| label: export
@@ -1343,26 +1467,25 @@ write_xlsx(top_clones, "top_clones")
 
 tests %>%
   filter(family %in% c("abundance", "expansion", "isotype", "shm_cell", "shm_memory_isotype")) %>%
-  select(family, metric, n_young, n_old, median_young, median_old, p_value, fdr, note) %>%
+  select(family, metric, n_young, n_old, median_young, median_old, test_method,
+    shapiro_young_p, shapiro_old_p, p_value, note) %>%
   arrange(family, p_value)
 ```
 
 ## 克隆、同种型和突变的其余图
 
-这些图补在主结果之后。组间散点仍是一位供者。Shannon 与该供者采到的重链细胞数关系很强，不能单独当成年龄造成的多样性变化。图 17 里 IgM 浆细胞合格供者很少，缺组只说明没有达到检验阈值，不是该年龄组没有 IgM 浆细胞。
-
-图 13. 最大 10 个克隆占该供者重链细胞的比例。
+这些图补充前面的主结果。每个点仍然是一位供者。Shannon 会随着采到的细胞数变大，细胞多的供者数值自然更高，所以不能把它的年龄差异解释成克隆多样性变了。
 
 ```{r}
 #| label: figure-exports
 
 dict_donor <- tibble(
   field = c("sample_id", "age_group", "fraction", "expanded_frac", "median_mu", "pct"),
-  meaning = c("供者", "年龄组", "占该供者 B 系细胞的比例", "扩增细胞占该层有克隆键细胞的比例",
+  meaning = c("供者", "年龄组", "占该供者 B 系细胞的比例", "扩增细胞占该层能定义克隆的细胞的比例",
               "V 区突变频率中位数，百分数", "V 基因使用率，百分数；未观察到为 0")
 )
-params <- tibble(item = c("min_bcr_cells", "min_subtype_cells", "min_donors"),
-                 value = c(min_bcr_cells, min_subtype_cells, min_donors))
+params <- tibble(item = c("min_bcr_cells", "min_subtype_cells", "min_donors", "normality_alpha"),
+                 value = c(min_bcr_cells, min_subtype_cells, min_donors, normality_alpha))
 stat_for <- function(ids) tests %>% filter(test_id %in% ids)
 
 save_plot(p_frac, "05_subtype_fraction_by_age", 5.2, 2.2)
@@ -1404,7 +1527,7 @@ write_fig_xlsx("13_top10", p_top$data,
 
 ```
 
-图 14. Shannon 指数。它随采样细胞数明显变化，这里只作描述。
+图 13. 每个点是一位供者；范围是**全部 B 系重链**，不是单独 Plasma。纵轴为最大 10 个克隆占该供者重链细胞的百分比，属描述性指标，不作浆细胞集中度的年龄结论。
 
 ```{r}
 #| label: shannon-comparison
@@ -1426,7 +1549,7 @@ write_fig_xlsx("14_shannon", p_shan$data,
 
 ```
 
-图 16. 同种型内部重新计算的扩增比例。一个克隆里各有一个 IgM 和一个 IgG 细胞时，两边都不算同种型内扩增。
+图 14. 每个点是一位供者，分面为 Naive B、Memory B、Plasma。纵轴为 Shannon 指数，随回收细胞数增大而倾向升高；**Plasma 分面尤其与供者间回收深度相关**，须与图 03 及主要结论中的浆细胞回收一并解读，不宜单独当作年龄效应。Memory B 的 Shannon 在本队列未见稳定组间差异（原始 p≈0.90）。
 
 ```{r}
 #| label: isotype-expansion-comparison
@@ -1444,7 +1567,7 @@ write_fig_xlsx("16_within_isotype", p_iso_exp$data, statistics_from_plot(p_iso_e
 
 ```
 
-图 17. 浆细胞按同种型看的 V 区突变中位数。IgM 只有少数供者达到 10 个细胞，所以不画检验。
+图 16. 每个点是一位供者，分面是 IgM、IgG、IgA。纵轴是这一类抗体内部的扩增细胞百分比。同一个克隆如果一个细胞是 IgM、另一个是 IgG，两边都不算这一类内部的扩增。
 
 ```{r}
 #| label: plasma-shm-comparison
@@ -1458,6 +1581,13 @@ p_plasma <- annotate_age_plot(p_plasma, plasma_iso %>% filter(isotype_group %in%
 save_plot(p_plasma, "17_shm_plasma_by_isotype", 5.2, 2.2)
 print(p_plasma)
 write_fig_xlsx("17_plasma_shm", p_plasma$data, statistics_from_plot(p_plasma), dict_donor, params)
+```
+
+图 17. 每个点是一位供者。这是 Plasma 再按 IgM、IgG、IgA 看的 V 区突变中位数。IgM Plasma 多数供者不到 10 个细胞，所以不检验；缺的组不是这个年龄没有 IgM Plasma。
+
+```{r}
+#| label: workbook-exports
+#| include: false
 
 save_plot(p_sw, "09_switched_by_main_subtype", 5.2, 2.2)
 write_fig_xlsx("09_switched", iso_sub %>% filter(cell_subtype %in% main_subtypes),
@@ -1481,8 +1611,6 @@ write_fig_xlsx("10_ighv", v_cell %>% filter(v_gene %in% top_v),
   statistics_from_plot(p_v), dict_donor, params)
 
 ```
-
-图 02b–02e. 每个点是一个 B 系细胞，用的是原来的 UMAP 坐标。图 02b 的颜色是年龄。图 02c 的灰色是没有可用重链。图 02d 的灰色是恒定区未知，细胞仍可能有重链。图 02e 的灰色是突变值缺失，其中一部分细胞已经有重链。
 
 ```{r}
 #| label: umap-feature-panels
@@ -1546,12 +1674,12 @@ save_umap_panel <- function(p, name, discrete = TRUE) {
     p <- p + guides(color = guide_legend(override.aes = list(size = 3.2, alpha = 1)))
   }
   save_plot(p, name, 4.6, 5.1)
-  print(p)
+  invisible(p)
 }
-save_umap_panel(p_age, "02b_umap_age")
-save_umap_panel(p_clone, "02b_umap_clone")
-save_umap_panel(p_iso_u, "02b_umap_isotype")
-save_umap_panel(p_mu, "02b_umap_shm", discrete = FALSE)
+p_age_show <- save_umap_panel(p_age, "02b_umap_age")
+p_clone_show <- save_umap_panel(p_clone, "02b_umap_clone")
+p_iso_show <- save_umap_panel(p_iso_u, "02b_umap_isotype")
+p_mu_show <- save_umap_panel(p_mu, "02b_umap_shm", discrete = FALSE)
 write_fig_xlsx("02b_umap_age", umap_panel_data, NULL, umap_dict, params)
 write_fig_xlsx("02b_umap_clone", umap_panel_data, NULL, umap_dict, params)
 write_fig_xlsx("02b_umap_isotype", umap_panel_data, NULL, umap_dict, params)
@@ -1565,9 +1693,13 @@ annotated_plot_objects <- list(
 figure_annotations <- bind_rows(lapply(names(annotated_plot_objects), function(id) {
   statistics_from_plot(annotated_plot_objects[[id]]) %>% mutate(figure_id = id)
 }))
-annotation_check <- figure_annotations %>% left_join(tests %>% select(test_id, final_p = p_value, final_bh = fdr), by = "test_id")
-stopifnot(all(abs(annotation_check$p_value - annotation_check$final_p) < 1e-12, na.rm = TRUE),
-          all(abs(annotation_check$fdr - annotation_check$final_bh) < 1e-12, na.rm = TRUE))
+if ("p_bh" %in% names(figure_annotations)) {
+  figure_annotations <- figure_annotations %>% select(-p_bh)
+}
+figure_annotations <- figure_annotations %>%
+  left_join(tests %>% select(test_id, p_bh), by = "test_id")
+annotation_check <- figure_annotations %>% left_join(tests %>% select(test_id, final_p = p_value), by = "test_id")
+stopifnot(all(abs(annotation_check$p_value - annotation_check$final_p) < 1e-12, na.rm = TRUE))
 write_csv(figure_annotations, file.path(tab_dir, "figure_stat_annotations.csv"), na = "")
 umap_plot_objects <- list(subtype = p_umap, age = p_age, clone = p_clone, isotype = p_iso_u, shm = p_mu)
 umap_display_audit <- bind_rows(lapply(names(umap_plot_objects), function(panel) {
@@ -1585,8 +1717,8 @@ figure_index <- tibble(
     "08", "09", "10", "11", "12", "13", "14", "16", "17", "18", "19", "20", "21", "22", "23", "24"),
   title = c("Marker 点图", "亚型 UMAP", "UMAP 年龄", "UMAP 克隆大小", "UMAP 同种型", "UMAP 突变",
             "重链回收率", "亚型组成", "重点亚型比例", "其余亚型比例", "全库扩增", "主要亚型内扩增", "其余亚型内扩增",
-            "同种型构成", "类别转换", "IGHV 使用率", "主要亚型 SHM", "记忆 B 分同种型 SHM",
-            "Top 10 克隆占比", "Shannon", "同种型内扩增", "浆细胞分同种型 SHM",
+            "同种型构成", "类别转换", "IGHV 使用率", "主要亚型 SHM", "Memory B 分同种型 SHM",
+            "Top 10 克隆占比", "Shannon", "同种型内扩增", "Plasma 分同种型 SHM",
             "供者克隆大小", "年轻年老克隆大小", "亚型克隆大小甜甜圈", "扩增细胞亚型甜甜圈",
             "Gini-Simpson", "STARTRAC 扩增", "STARTRAC 亚型间共享"),
   workbook = paste0("fig_", c(
@@ -1615,9 +1747,47 @@ write_xlsx(figure_index, "figure_table_map")
 write_csv(figure_index, file.path(tab_dir, "figure_table_map.csv"))
 ```
 
+下面四张图的位置和前面的 UMAP 相同，每个点是一个 B 系细胞。只用来看分布，不做检验。
+
+```{r}
+#| label: umap-age
+#| fig-width: 4.6
+#| fig-height: 5.1
+print(p_age_show)
+```
+
+图 02b. 颜色是年龄组。
+
+```{r}
+#| label: umap-clone
+#| fig-width: 4.6
+#| fig-height: 5.1
+print(p_clone_show)
+```
+
+图 02c. 颜色是克隆大小。灰色是没有可用重链。
+
+```{r}
+#| label: umap-isotype
+#| fig-width: 4.6
+#| fig-height: 5.1
+print(p_iso_show)
+```
+
+图 02d. 颜色是抗体类别。灰色是恒定区没测到，细胞仍可能有重链。
+
+```{r}
+#| label: umap-shm
+#| fig-width: 4.6
+#| fig-height: 5.1
+print(p_mu_show)
+```
+
+图 02e. 颜色是重链 V 区突变百分比。灰色是突变值缺失。
+
 ## 图表数据 {.unnumbered}
 
-供者短编号和样本对应表：[study_design.xlsx](../results/bcr/tables/study_design.xlsx)。作图数据索引：[figure_table_map.xlsx](../results/bcr/tables/figure_table_map.xlsx)。索引里列出每张图的 PDF、PNG 和工作簿。
+供者短编号和样本的对应表在 [study_design.xlsx](../results/bcr/tables/study_design.xlsx)。每张图的 PDF、PNG 和作图用 Excel 列在 [figure_table_map.xlsx](../results/bcr/tables/figure_table_map.xlsx)。下载时请保持 `tables/` 和 `figures/` 的相对位置，链接才打得开。
 
 ```{r}
 #| label: figure-links

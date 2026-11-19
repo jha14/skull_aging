@@ -339,7 +339,14 @@ make_donut <- function(df, fill, title, colors) {
     )
 }
 
-wilcox_age <- function(df, value_col, metric, family, min_n = 3, test_id = NULL) {
+shapiro_group_p <- function(x) {
+  x <- x[is.finite(x)]
+  if (length(x) < 3L || length(x) > 5000L || length(unique(x)) < 2L) return(NA_real_)
+  tryCatch(stats::shapiro.test(x)$p.value, error = function(e) NA_real_)
+}
+
+wilcox_age <- function(df, value_col, metric, family, min_n = 3, test_id = NULL,
+                       normality_alpha = getOption("bcr.normality_alpha", 0.05)) {
   df <- df[is.finite(df[[value_col]]) & !is.na(df$age_group), , drop = FALSE]
   if (!"sample_id" %in% names(df) || anyDuplicated(df$sample_id)) {
     stop("Each test must contain one row per donor: ", metric)
@@ -352,6 +359,8 @@ wilcox_age <- function(df, value_col, metric, family, min_n = 3, test_id = NULL)
     n_young = n_young, n_old = n_old,
     median_young = NA_real_, median_old = NA_real_,
     median_difference_old_minus_young = NA_real_,
+    shapiro_young_p = NA_real_, shapiro_old_p = NA_real_,
+    test_method = NA_character_,
     p_value = NA_real_, note = "", stringsAsFactors = FALSE
   )
   if (n_young < min_n || n_old < min_n) {
@@ -360,23 +369,61 @@ wilcox_age <- function(df, value_col, metric, family, min_n = 3, test_id = NULL)
     if (n_old > 0) out$median_old <- median(df[[value_col]][df$age_group == "Old"])
     return(out)
   }
-  out$median_young <- median(df[[value_col]][df$age_group == "Young"])
-  out$median_old <- median(df[[value_col]][df$age_group == "Old"])
+  young_vals <- df[[value_col]][df$age_group == "Young"]
+  old_vals <- df[[value_col]][df$age_group == "Old"]
+  out$median_young <- median(young_vals)
+  out$median_old <- median(old_vals)
   out$median_difference_old_minus_young <- out$median_old - out$median_young
   if (length(unique(df[[value_col]])) < 2) {
     out$note <- "not tested: no variation across donors"
     return(out)
   }
-  wt <- suppressWarnings(stats::wilcox.test(df[[value_col]] ~ df$age_group, exact = FALSE))
-  out$p_value <- wt$p.value
+  out$shapiro_young_p <- shapiro_group_p(young_vals)
+  out$shapiro_old_p <- shapiro_group_p(old_vals)
+  both_normal <- !is.na(out$shapiro_young_p) && !is.na(out$shapiro_old_p) &&
+    out$shapiro_young_p >= normality_alpha && out$shapiro_old_p >= normality_alpha
+  if (both_normal) {
+    tt <- suppressWarnings(stats::t.test(young_vals, old_vals, var.equal = FALSE))
+    out$p_value <- tt$p.value
+    out$test_method <- "Welch t-test"
+  } else {
+    wt <- suppressWarnings(stats::wilcox.test(df[[value_col]] ~ df$age_group, exact = FALSE))
+    out$p_value <- wt$p.value
+    out$test_method <- "Wilcoxon"
+  }
   out
 }
 
 adjust_tests <- function(tests) {
-  tests %>%
-    dplyr::group_by(family) %>%
-    dplyr::mutate(fdr = p.adjust(p_value, method = "BH")) %>%
-    dplyr::ungroup()
+  if (!nrow(tests)) return(tests)
+  out <- tests
+  out$p_bh <- NA_real_
+  for (fam in unique(out$family)) {
+    idx <- which(out$family == fam & !is.na(out$p_value))
+    if (!length(idx)) next
+    out$p_bh[idx] <- stats::p.adjust(out$p_value[idx], method = "BH")
+  }
+  out
+}
+
+subtype_fraction_blurb <- function(tests, subtype) {
+  metric <- paste0("Subtype fraction, ", subtype)
+  hit <- tests[tests$family == "abundance" & tests$metric == metric, , drop = FALSE]
+  if (!nrow(hit)) return(sprintf("%s：无对应检验。", subtype))
+  hit <- hit[1, ]
+  if (is.na(hit$p_value)) {
+    return(sprintf("%s：%s（Young/Old n=%d/%d）。", subtype, hit$note, hit$n_young, hit$n_old))
+  }
+  bh <- if ("p_bh" %in% names(hit) && !is.na(hit$p_bh)) {
+    sprintf("；同类检验参考 BH = %s", format.pval(hit$p_bh, digits = 3, eps = 0.001))
+  } else {
+    ""
+  }
+  sprintf(
+    "%s 年轻→年老供者中位数约 %.2f%%→%.2f%%（%s；Young/Old n=%d/%d；图括号为原始 %s%s）。",
+    subtype, 100 * hit$median_young, 100 * hit$median_old, hit$test_method,
+    hit$n_young, hit$n_old, format_exact_p(hit$p_value), bh
+  )
 }
 
 add_exact_p <- function(p, data, y, p_values, facet = NULL) {
@@ -480,8 +527,7 @@ theme_umap_ref <- function() {
 
 collect_age_tests <- function(items) {
   out <- dplyr::bind_rows(items)
-  out <- out[!duplicated(out$test_id), , drop = FALSE]
-  adjust_tests(out)
+  out[!duplicated(out$test_id), , drop = FALSE]
 }
 
 annotate_age_plot <- function(plot, data, value, tests, mapping, facets = character()) {
@@ -537,8 +583,8 @@ test_caption <- function(tests, test_id) {
     return(paste0(hit$note, "; Young n=", hit$n_young, ", Old n=", hit$n_old))
   }
   sprintf(
-    "BH = %.3f; p = %.3g; Young/Old n = %d/%d; Old − Young median = %.3g",
-    hit$fdr, hit$p_value, hit$n_young, hit$n_old, hit$median_difference_old_minus_young
+    "%s; p = %.3g; Young/Old n = %d/%d; Old − Young median = %.3g",
+    hit$test_method, hit$p_value, hit$n_young, hit$n_old, hit$median_difference_old_minus_young
   )
 }
 

@@ -6,9 +6,9 @@
 
 最初 21 人交付版仍在：**https://jha14.github.io/skull_aging/**
 
-去掉 O6 和 O11：https://jha14.github.io/skull_aging/exclude_o6_o11/
+去掉 O6 和 O11 的交付版：https://jha14.github.io/skull_aging/exclude_o6_o11/
 
-再去掉 O8：https://jha14.github.io/skull_aging/exclude_o6_o8_o11/
+去掉 O6、O8 和 O11 的交付版：https://jha14.github.io/skull_aging/exclude_o6_o8_o11/
 
 ## 本地复现
 

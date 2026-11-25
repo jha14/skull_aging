@@ -40,7 +40,7 @@ class ReportAudit(HTMLParser):
 
 
 DOWNLOAD_BANNER = """<div class="bcr-download-banner" style="background:#e8f4fc;border:1px solid #b8d4e8;padding:0.75rem 1rem;margin:0 0 1rem;font-size:0.95rem;line-height:1.45;">
-<strong>这一页是去掉 O6 和 O11 的结果。</strong>
+<strong>这一页是去掉 O6 和 O11、保留 O8 的交付版本。</strong>
 <a href="bcr_delivery.zip">下载 bcr_delivery.zip</a>
 （含全部表格、PDF/PNG、源码与 <code>bcr_cells.rds</code>；解压后打开包内 HTML 亦可阅读。）
 </div>

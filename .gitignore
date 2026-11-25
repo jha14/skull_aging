@@ -10,6 +10,7 @@ codes/bcr_pre_delivery_review.qmd
 
 # Rebuilt by package_bcr_delivery.py
 Rplots.pdf
+archive/**/render_out/
 
 # OS / editor
 .DS_Store

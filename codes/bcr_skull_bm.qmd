@@ -27,7 +27,7 @@ execute:
 
 记忆 B 细胞参与再次应答，浆细胞负责分泌抗体；下文优先汇报这两类细胞。所有年龄比较都是一位供者一个点，不是把每个细胞当成独立样本。细胞类型用英文，与 UMAP 一致。图上的括号是**原始 p**（未做多重校正）；`age_tests.xlsx` 另有按检验 family 的**参考 BH**，正文不据此写成已确认的年龄效应。代码默认折叠，不看代码也可读结果。
 
-样本剔除按事先约定的顺序核对已交付结果：只去掉 O6 时，浆细胞占 B 系细胞的比例仍不显著（原始 p≈0.12）；再去掉 O11 后，该比例原始 p≈0.046。O8 没有去掉，因为继续删除后浆细胞扩增和 V 区突变仍不到 0.05。UMAP 仍用原来的整合坐标，只是不画 O6 和 O11 的细胞。本版不做供者间共享克隆，也不做公共抗原库比对。年轻组 4/10、年老组 9/9 为动脉瘤相关手术供者。下述为本队列观察，不是普适衰老机制。具体数字见主要结论。
+这是正式结果：去掉 O6 和 O11，保留 O8。只去掉 O6 时，浆细胞比例并没有更清楚；再去掉 O11 后，这一比例才出现本页所写的组间差异。额外去掉 O8 的结果另作敏感性分析，不作为本页结论。UMAP 仍用原来的整合坐标，只是不画 O6 和 O11 的细胞。本版不做供者间共享克隆，也不做公共抗原库比对。年轻组 4/10、年老组 9/9 为动脉瘤相关手术供者。下述为本队列观察，不是普适衰老机制。具体数字见主要结论。
 
 ```{r}
 #| label: setup
@@ -66,6 +66,14 @@ dir.create(fig_dir, recursive = TRUE, showWarnings = FALSE)
 dir.create(tab_dir, recursive = TRUE, showWarnings = FALSE)
 dir.create(rdata_dir, recursive = TRUE, showWarnings = FALSE)
 source(file.path(project_dir, "codes/bcr_helpers.R"))
+test_row <- function(metric) {
+  hit <- collect_age_tests(stat_tests)
+  hit <- hit[hit$metric == metric, , drop = FALSE]
+  if (!nrow(hit)) stop("Missing test: ", metric)
+  hit[nrow(hit), ]
+}
+pct1 <- function(x) sprintf("%.2f%%", 100 * x)
+p3 <- function(x) sprintf("%.3f", x)
 options(bcr.normality_alpha = normality_alpha)
 stopifnot(capabilities("cairo"), bcr_font_family %in% systemfonts::system_fonts()$family)
 knitr::opts_chunk$set(dev = "ragg_png", dpi = 144, fig.retina = 2)
@@ -567,7 +575,7 @@ print(p_exp_sub)
 
 ```
 
-图 07. 每个点仍是一位供者，但分母和克隆大小都只在该亚型内部计算。例如一个克隆有 1 个 Memory B 和 1 个 Plasma，这个 Memory B 细胞在本图里不算扩增。结论：Naive B、Memory B、Plasma 都没有 p < 0.05。Memory B 的供者中位数是 0 对 3.4%（p = 0.13），Plasma 是 6.5% 对 12.5%（p = 0.20）。这张图不是后面的 STARTRAC。
+图 07. 每个点仍是一位供者，但分母和克隆大小都只在该亚型内部计算。例如一个克隆有 1 个 Memory B 和 1 个 Plasma，这个 Memory B 细胞在本图里不算扩增。Memory B 的供者中位数是 `r pct1(test_row("Memory B; primary; expanded_frac")$median_young)` 对 `r pct1(test_row("Memory B; primary; expanded_frac")$median_old)`（p = `r p3(test_row("Memory B; primary; expanded_frac")$p_value)`）。Plasma 是 `r pct1(test_row("Plasma; primary; expanded_frac")$median_young)` 对 `r pct1(test_row("Plasma; primary; expanded_frac")$median_old)`（p = `r p3(test_row("Plasma; primary; expanded_frac")$p_value)`）。这三项都没有 p < 0.05，还不能说扩增更强。这张图不是后面的 STARTRAC。
 
 ```{r}
 #| label: clone-subtype-supplement
@@ -822,7 +830,7 @@ save_plot(p_expa, "23_startrac_expansion", 5.3, 4.3)
 print(p_expa)
 ```
 
-图 23. 每个点是一位供者，纵轴是 STARTRAC 的 expansion。它看细胞是不是集中在少数克隆上，不是扩增细胞的百分比。Memory B 的中位数是 0 对 0.0014（p = 0.065），差值很小，不能当成扩增增强。两项都没有 p < 0.05。
+图 23. 每个点是一位供者，纵轴是 STARTRAC 的 expansion。它看细胞是不是集中在少数克隆上，不是扩增细胞的百分比。Memory B 的供者中位数是 `r sprintf("%.5f", test_row("STARTRAC expansion, Memory B")$median_young)` 对 `r sprintf("%.5f", test_row("STARTRAC expansion, Memory B")$median_old)`（p = `r p3(test_row("STARTRAC expansion, Memory B")$p_value)`）。差值很小，不能当成扩增增强。
 
 ```{r}
 #| label: startrac-transition
@@ -961,7 +969,7 @@ print(p_sw)
 
 ```
 
-图 09. 每个点是一位供者，纵轴是该亚型里 class-switched 细胞的百分比。Naive B 年轻组中位数是 0，年老组约 1%（p = 0.013）。这不能解释成 Naive B 在做类别转换：全部 Naive B 里只有 11 个 IgG 和 6 个 IgA，更像是少量已转换细胞落在 Naive B 聚类里。Memory B 约 44% 对 48%（p = 0.51），Plasma 约 97% 对 95%（p = 0.36），这两处没有年龄差异。
+图 09. 每个点是一位供者，纵轴是该亚型里 class-switched 细胞的百分比。Naive B 的原始 p = `r p3(test_row("switched_frac, Naive B")$p_value)`。这不能解释成 Naive B 在做类别转换：本版全部 Naive B 里只有 `r sum(analysis$cell_subtype == "Naive B" & analysis$isotype_group == "IGHG", na.rm = TRUE)` 个 IgG 和 `r sum(analysis$cell_subtype == "Naive B" & analysis$isotype_group == "IGHA", na.rm = TRUE)` 个 IgA，更像是少量已转换细胞落在 Naive B 聚类里。Memory B 的原始 p = `r p3(test_row("switched_frac, Memory B")$p_value)`，Plasma 的原始 p = `r p3(test_row("switched_frac, Plasma")$p_value)`，这两处没有明确年龄差异。
 
 ```{r}
 #| label: switched-export
@@ -1055,7 +1063,7 @@ write_xlsx(list(cell_weighted = v_cell, clone_weighted = v_clone), "ighv_usage")
 
 相对未重排的种系 V 区参考，SHM 报告为 IGHV 区碱基差异比例（%）。图上每一位供者先在该亚型内取细胞突变率的中位数，再作组间比较。它描述序列变化，不代表抗体亲和力或分泌量。突变百分比来自所选重链的 IGHV 区（IMGT V 区、种系比对），不算 CDR3，也不是整条重链；对不上所选重链的细胞不进入。
 
-IgD 的突变已经算过，共 302 个细胞，总体中位数是 0。Memory B 里只有 32 个 IgD，多数供者只有 1–2 个，达不到每供者 10 个细胞，所以没有单独的 IgD 图。分同种型的图只保留 IgM、IgG 和 IgA。
+IgD 也参与突变计算，但细胞数很少，下面在算出突变率之后再给出计数。多数供者的 Memory B 只有 1–2 个 IgD，达不到每供者 10 个细胞，所以没有单独的 IgD 图。分同种型的图只保留 IgM、IgG 和 IgA。
 
 ```{r}
 #| label: shm
@@ -1193,6 +1201,8 @@ save_plot(p_shm, "11_shm_main_subtypes", 5.2, 2.2)
 print(p_shm)
 ```
 
+本版重链里 IgD 共 `r sum(analysis$c_gene == "IGHD", na.rm = TRUE)` 个，其中能算出 V 区突变率的有 `r sum(analysis$c_gene == "IGHD" & !is.na(analysis$mu_percent), na.rm = TRUE)` 个。Memory B 的 IgD 有 `r sum(analysis$cell_subtype == "Memory B" & analysis$c_gene == "IGHD", na.rm = TRUE)` 个。这些细胞的突变中位数是 0。
+
 图 11. 每个点是一位供者，纵轴是该亚型细胞的 IGHV 区突变中位数。括号是本版原始 p。Naive B 通常接近 0。Plasma 的组间差异以括号和主要结论表为准。
 
 ```{r}
@@ -1267,7 +1277,7 @@ write_fig_xlsx("25_igg_plasma_expanded", igg_plasma_metrics, statistics_from_plo
   tibble(item = "min_subtype_cells", value = min_subtype_cells))
 ```
 
-图 25. 每个点是一位供者。纵轴是 IgG 浆细胞里，属于扩增克隆的细胞占百分之几。同一个供者里，IGHV 相同而且重链 CDR3 氨基酸完全相同、至少有 2 个细胞，才算扩增。只在 IgG 浆细胞内部计算，不把别的浆细胞算进来。年老组中位数大约 7% 到 21%，7 位年轻供者和 8 位年老供者，p = 0.25，两组重叠很大，还不能说扩增更强。
+图 25. 每个点是一位供者。纵轴是 IgG 浆细胞里，属于扩增克隆的细胞占百分之几。同一个供者里，IGHV 相同而且重链 CDR3 氨基酸完全相同、至少有 2 个细胞，才算扩增。只在 IgG 浆细胞内部计算，不把别的浆细胞算进来。年轻组中位数是 `r pct1(test_row("IGHG Plasma; expanded_frac")$median_young)`，年老组是 `r pct1(test_row("IGHG Plasma; expanded_frac")$median_old)`（`r test_row("IGHG Plasma; expanded_frac")$n_young` 对 `r test_row("IGHG Plasma; expanded_frac")$n_old` 位供者，p = `r p3(test_row("IGHG Plasma; expanded_frac")$p_value)`）。两组重叠很大，还不能说扩增更强。
 
 ```{r}
 #| label: igg-plasma-shm
@@ -1327,7 +1337,7 @@ write_xlsx(list(tests = tests, primary_raw = primary_hits), "age_tests")
 
 ## 主要结论
 
-下表是去掉 O6、O11 之后的供者中位数。比例是占 B 系细胞的百分比，不是绝对细胞数。图上括号是原始 p，表里另有同 family 的参考 BH。原始 p < 0.05 只记为探索性信号。完整比较见 `age_tests.xlsx`。
+下表是去掉 O6、O11 之后的供者中位数，年轻组在前、年老组在后。只有“占 B 系细胞比例”和 Immature B 比例以全部 B 系细胞为分母。扩增比例的分母是该亚型或该比较范围内的重链细胞。IgG 占浆细胞比例的分母是有可用重链的浆细胞。图上括号是原始 p，表里另有同 family 的参考 BH。原始 p < 0.05 只记为探索性信号。完整比较见 `age_tests.xlsx`。
 
 **浆细胞**  
 占 B 系细胞的比例是本版首先核对的终点（图 05）：供者中位数约 5.55%→23.0%，10 对 9 人，Wilcoxon 原始 p = 0.045，abundance 家族参考 BH = 0.14。这是探索性信号，而且比例变化不是绝对细胞数变化。亚型内扩增约 6.5%→13.3%（9 对 9 人，原始 p = 0.070）。整体 V 区突变约 9.38%→9.73%（原始 p = 0.19）。Gini–Simpson 原始 p = 0.11。扩增、突变和多样性都还不能写成已经显著。
@@ -1336,7 +1346,7 @@ write_xlsx(list(tests = tests, primary_raw = primary_hits), "age_tests")
 图 25 看 IgG 浆细胞内部的扩增：大约 7% 到 21%，p = 0.25，两组重叠很大。图 26 的 V 区突变两组都在 9% 左右，p = 0.40。图 27 看克隆是否分散，p = 0.22；O8 是年老组里最低的一点，只有 10 个 IgG 浆细胞。IgG 占该供者全部浆细胞的比例大约 65% 到 51%，p = 0.074，年老组并没有更高。这几项都还是线索，不能写成 IgG 浆细胞已经扩增或突变更高。
 
 **记忆 B 与早期组成**  
-Memory B 的组成、扩增、SHM 和多样性仍列在表中，供对照。Immature B 比例下降是组成观察。全库扩增没有稳定年龄差异。STARTRAC 不作扩增结论。本版没有做共享克隆或抗原库比对。年轻组 4/10、年老组 9/9 为动脉瘤相关手术供者。
+Memory B 的组成、扩增和突变列在表中，供对照。Immature B 比例下降是组成观察。全库扩增没有稳定年龄差异。STARTRAC 不作扩增结论。本版没有做共享克隆或抗原库比对。年轻组 4/10、年老组 9/9 为动脉瘤相关手术供者。
 
 ```{r}
 #| label: result-summary
@@ -1532,7 +1542,7 @@ write_fig_xlsx("14_shannon", p_shan$data,
 
 ```
 
-图 14. 每个点是一位供者，分面为 Naive B、Memory B、Plasma。纵轴为 Shannon 指数，随回收细胞数增大而倾向升高；**Plasma 分面尤其与供者间回收深度相关**，须与图 03 及主要结论中的浆细胞回收一并解读，不宜单独当作年龄效应。Memory B 的 Shannon 在本队列未见稳定组间差异（原始 p≈0.90）。
+图 14. 每个点是一位供者，分面为 Naive B、Memory B、Plasma。纵轴为 Shannon 指数，随回收细胞数增大而倾向升高。Plasma 这一格尤其受每位供者回收到多少浆细胞的影响，要和图 03 的回收情况一起看，不宜单独当成年龄效应。Memory B 的 Shannon 原始 p = `r p3(tests$p_value[tests$metric == "Memory B; primary; shannon"][1])`，没有稳定的组间差异。
 
 ```{r}
 #| label: isotype-expansion-comparison

@@ -3495,7 +3495,7 @@ window.onload = function() {
   <li><a href="#主要结论" id="toc-主要结论" class="nav-link" data-scroll-target="#主要结论"><span class="header-section-number">12</span> 主要结论</a></li>
   <li><a href="#附录结果文件" id="toc-附录结果文件" class="nav-link" data-scroll-target="#附录结果文件">附录：结果文件</a></li>
   <li><a href="#克隆同种型和突变的其余图" id="toc-克隆同种型和突变的其余图" class="nav-link" data-scroll-target="#克隆同种型和突变的其余图"><span class="header-section-number">13</span> 克隆、同种型和突变的其余图</a></li>
-  <li><a href="#阅读说明" id="toc-阅读说明" class="nav-link" data-scroll-target="#阅读说明">阅读说明</a></li>
+  <li><a href="#图表数据" id="toc-图表数据" class="nav-link" data-scroll-target="#图表数据">图表数据</a></li>
   <li><a href="#运行环境" id="toc-运行环境" class="nav-link" data-scroll-target="#运行环境">运行环境</a></li>
   </ul>
 </nav>
@@ -3522,9 +3522,9 @@ window.onload = function() {
 </header>
 
 
-<p><strong>这是去掉 O6、O8 和 O11 的交付版本。</strong> 本页包含正文和内嵌图。剔除的是 O6（LXY_SkullBM_240412）、O8（WLR220308_Z）和 O11（ZFR_SkullBM_240315）。保留年轻组 10 人（21–32 岁）和年老组 8 人（59–77 岁）。只去掉 O6 和 O11、保留 O8 的交付版本另行发布。BCR 是 B 细胞受体。这里只用每个 B 细胞的一条重链：看它属于哪种细胞、抗体是哪一类、有没有和别的细胞用同一套序列，以及 V 区突变高不高。后续实验重点是浆细胞，尤其是 IgG 浆细胞。</p>
-<p>记忆 B 细胞参与再次应答，浆细胞负责分泌抗体；下文优先汇报这两类细胞。所有年龄比较都是一位供者一个点，不是把每个细胞当成独立样本。细胞类型用英文，与 UMAP 一致。图上的括号是<strong>原始 p</strong>（未做多重校正）。主要结论表里的参考 BH 按同一类比较放在一起校正，不据此写成已经确认的年龄效应。代码默认折叠，不看代码也可读结果。</p>
-<p>样本是按约定逐个核对后去掉的。只去掉 O6 时，浆细胞比例仍不显著；再去掉 O11 后，这个比例的原始 p 约 0.045。O8 是年老组里浆细胞比例第二低、IgG 浆细胞多样性也最低的供者，本版把它也去掉，用来看结果是否更清楚。UMAP 仍用原来的坐标，只是不画这三位供者的细胞。本版不做供者之间的共享克隆，也不做公共抗原库比对。年轻组 4/10、年老组 8/8 为动脉瘤相关手术供者。下面是这一队列的观察，不是普遍的衰老机制。具体数字见主要结论。</p>
+<p>本报告比较颅骨骨髓 B 细胞。已交付的 21 人队列里，本版去掉年老组 O6（LXY_SkullBM_240412）、O8（WLR220308_Z）和 O11（ZFR_SkullBM_240315），保留年轻组 10 人（21–32 岁）和年老组 8 人（59–77 岁）。BCR 是 B 细胞受体。这里只用每个 B 细胞的一条重链：看它属于哪种细胞、抗体是哪一类、有没有和别的细胞用同一套序列，以及 V 区突变高不高。后续实验重点是浆细胞，尤其是 IgG 浆细胞。</p>
+<p>记忆 B 细胞参与再次应答，浆细胞负责分泌抗体；下文优先汇报这两类细胞。所有年龄比较都是一位供者一个点，不是把每个细胞当成独立样本。细胞类型用英文，与 UMAP 一致。图上的括号是<strong>原始 p</strong>（未做多重校正）；<code>age_tests.xlsx</code> 另有按检验 family 的<strong>参考 BH</strong>，正文不据此写成已确认的年龄效应。代码默认折叠，不看代码也可读结果。</p>
+<p>本版在去掉 O6 和 O11 之后，再去掉 O8。只去掉 O6 时，浆细胞比例并没有更清楚；去掉 O6 和 O11 后，这一比例的原始 p 约 0.045。UMAP 仍用原来的整合坐标，只是不画这三位供者的细胞。本版不做供者间共享克隆，也不做公共抗原库比对。年轻组 4/10、年老组 8/8 为动脉瘤相关手术供者。下述为本队列观察，不是普适衰老机制。具体数字见主要结论。</p>
 <section id="样本和细胞标签" class="level2" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="样本和细胞标签"><span class="header-section-number">1</span> 样本和细胞标签</h2>
 <p>这一节先确认比的是谁，以及图上的细胞名称是什么意思。年龄和分组只用颅骨骨髓。编号仍按最初 21 人的顺序，O6、O8 和 O11 不进入本版。保留年轻组 10 人（21–32 岁）、年老组 8 人（59–77 岁）。</p>
@@ -3585,7 +3585,7 @@ window.onload = function() {
 </div>
 </div>
 </div>
-<p>上表是本版纳入的供者。短编号仍是最初 21 人里的 Y1–Y10、O1–O11，因此没有 O6、O8 和 O11。被剔除的就是这三位，编号不重排。</p>
+<p>上表是本版纳入的供者。短编号仍是最初 21 人里的 Y1–Y10、O1–O11，因此没有 O6、O8 和 O11。被剔除的三位见 <code>study_design.xlsx</code> 的 excluded 表。</p>
 <div class="cell">
 <details class="code-fold">
 <summary>查看分析代码</summary>
@@ -3899,7 +3899,7 @@ window.onload = function() {
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>abundance_bh <span class="ot">&lt;-</span> <span class="fu">adjust_tests</span>(abundance_plot_tests <span class="sc">%&gt;%</span> <span class="fu">filter</span>(family <span class="sc">==</span> <span class="st">&quot;abundance&quot;</span>))</span></code></pre></div><button title="复制到剪贴板" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-<p>图 05. 每个点是一位供者，纵轴是该细胞类型占该供者 B 细胞的百分比。本分面含 Immature B、Transitional B 与 Plasma。 Immature B 年轻→年老供者中位数约 11.87%→2.76%（Wilcoxon；Young/Old n=10/8；图括号为原始 p = &lt;0.001；同类检验参考 BH = 0.00776）。 Transitional B 年轻→年老供者中位数约 9.79%→4.21%（Welch t-test；Young/Old n=10/8；图括号为原始 p = 0.0109；同类检验参考 BH = 0.0436）。 Plasma 年轻→年老供者中位数约 5.55%→23.83%（Wilcoxon；Young/Old n=10/8；图括号为原始 p = 0.0145；同类检验参考 BH = 0.0436）。 浆细胞（Plasma）比例见本图；记忆 B（Memory B）比例见图 05s 与主要结论表。Immature 与 Transitional 分界并不绝对；把这两类合并后的比较不作为主结论。</p>
+<p>图 05. 每个点是一位供者，纵轴是该细胞类型占该供者 B 细胞的百分比。本分面含 Immature B、Transitional B 与 Plasma。 Immature B 年轻→年老供者中位数约 11.87%→2.76%（Wilcoxon；Young/Old n=10/8；图括号为原始 p = &lt;0.001；同类检验参考 BH = 0.00776）。 Transitional B 年轻→年老供者中位数约 9.79%→4.21%（Welch t-test；Young/Old n=10/8；图括号为原始 p = 0.0109；同类检验参考 BH = 0.0436）。 Plasma 年轻→年老供者中位数约 5.55%→23.83%（Wilcoxon；Young/Old n=10/8；图括号为原始 p = 0.0145；同类检验参考 BH = 0.0436）。 浆细胞（Plasma）比例见本图；记忆 B（Memory B）比例见图 05s 与主要结论表。Immature 与 Transitional 分界并不绝对；合并 Immature+Transitional 的比较见 age_tests（family = abundance_sensitivity）。</p>
 <div class="cell">
 <details class="code-fold">
 <summary>查看分析代码</summary>
@@ -3914,7 +3914,7 @@ window.onload = function() {
 </div>
 </div>
 </div>
-<p>图 05s. 每个点是一位供者，纵轴为占该供者 B 系细胞的百分比；读法与图 05 相同。图上括号是原始 p。 Memory B 年轻→年老供者中位数约 12.44%→22.26%（Welch t-test；Young/Old n=10/8；图括号为原始 p = 0.216；同类检验参考 BH = 0.324）。 其余分面（Naive B、Pro-B 等）供描述性比较；浆细胞比例见图 05。</p>
+<p>图 05s. 每个点是一位供者，纵轴为占该供者 B 系细胞的百分比；读法与图 05 相同（图括号为原始 p，同类检验参考 BH 见图注句式与 age_tests）。 Memory B 年轻→年老供者中位数约 12.44%→22.26%（Welch t-test；Young/Old n=10/8；图括号为原始 p = 0.216；同类检验参考 BH = 0.324）。 其余分面（Naive B、Pro-B 等）供描述性比较；浆细胞比例见图 05。</p>
 </section>
 <section id="克隆" class="level2" data-number="5">
 <h2 data-number="5" class="anchored" data-anchor-id="克隆"><span class="header-section-number">5</span> 克隆</h2>
@@ -4873,7 +4873,7 @@ window.onload = function() {
 </section>
 <section id="主要结论" class="level2" data-number="12">
 <h2 data-number="12" class="anchored" data-anchor-id="主要结论"><span class="header-section-number">12</span> 主要结论</h2>
-<p>下表是去掉 O6、O8、O11 之后的供者中位数，年轻组在前、年老组在后。只有“占 B 系细胞比例”和 Immature B 比例以全部 B 系细胞为分母。扩增比例的分母是该亚型或该比较范围内的重链细胞。IgG 占浆细胞比例的分母是有可用重链的浆细胞。表在本页内，不另附文件。图上括号是原始 p。p 小于 0.05 只说明本队列里这一项比较突出，还不是定论。</p>
+<p>下表是去掉 O6、O8、O11 之后的供者中位数，年轻组在前、年老组在后。只有“占 B 系细胞比例”和 Immature B 比例以全部 B 系细胞为分母。扩增比例的分母是该亚型或该比较范围内的重链细胞。IgG 占浆细胞比例的分母是有可用重链的浆细胞。图上括号是原始 p，表里另有同 family 的参考 BH。原始 p &lt; 0.05 只记为探索性信号。完整比较见 <code>age_tests.xlsx</code>。</p>
 <p><strong>浆细胞</strong><br>
 图 05 看浆细胞占 B 细胞的比例：大约 5.6% 到 23.8%，10 位年轻供者和 8 位年老供者，原始 p 约 0.015。年老组更高，但这是比例，不能说骨髓里的浆细胞数量一定增加了。图 07 看浆细胞里的扩增细胞：大约 6.5% 到 12.5%，原始 p 约 0.15，还不能说扩增更强。图 11 的 V 区突变两组接近，原始 p = 0.378。浆细胞 Gini–Simpson 的原始 p = 0.0304，参考 BH = 0.1215。浆细胞 Shannon 的原始 p = 0.0265，参考 BH = 0.2912。这两项多样性都受回收到的浆细胞数影响，不能单独当成年龄效应。</p>
 <p><strong>IgG 浆细胞</strong><br>
@@ -5552,9 +5552,43 @@ Memory B 的比例、扩增和突变仍列在表里，方便和浆细胞对照�
 </div>
 <p>图 02e. 颜色是重链 V 区突变百分比。灰色是突变值缺失。</p>
 </section>
-<section id="阅读说明" class="level2 unnumbered">
-<h2 class="unnumbered anchored" data-anchor-id="阅读说明">阅读说明</h2>
-<p>这一页是去掉 O6、O8、O11 的交付报告。图已经嵌在正文里。这里不提供 PDF、PNG、Excel 或 ZIP 下载。</p>
+<section id="图表数据" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="图表数据">图表数据</h2>
+<p>供者短编号和样本的对应表在 <a href="render_out/tables/study_design.xlsx">study_design.xlsx</a>。每张图的 PDF、PNG 和作图用 Excel 列在 <a href="render_out/tables/figure_table_map.xlsx">figure_table_map.xlsx</a>。下载时请保持 <code>tables/</code> 和 <code>figures/</code> 的相对位置，链接才打得开。</p>
+<ul>
+<li><p>图 01 Marker 点图：<a href="render_out/figures/01_marker_dotplot.pdf">PDF</a>，<a href="render_out/figures/01_marker_dotplot.png">PNG</a>，<a href="render_out/tables/fig_01_markers.xlsx">作图 Excel</a></p></li>
+<li><p>图 02 亚型 UMAP：<a href="render_out/figures/02_umap_subtype.pdf">PDF</a>，<a href="render_out/figures/02_umap_subtype.png">PNG</a>，<a href="render_out/tables/fig_02_umap.xlsx">作图 Excel</a></p></li>
+<li><p>图 02b UMAP 年龄：<a href="render_out/figures/02b_umap_age.pdf">PDF</a>，<a href="render_out/figures/02b_umap_age.png">PNG</a>，<a href="render_out/tables/fig_02b_umap_age.xlsx">作图 Excel</a></p></li>
+<li><p>图 02c UMAP 克隆大小：<a href="render_out/figures/02b_umap_clone.pdf">PDF</a>，<a href="render_out/figures/02b_umap_clone.png">PNG</a>，<a href="render_out/tables/fig_02b_umap_clone.xlsx">作图 Excel</a></p></li>
+<li><p>图 02d UMAP 同种型：<a href="render_out/figures/02b_umap_isotype.pdf">PDF</a>，<a href="render_out/figures/02b_umap_isotype.png">PNG</a>，<a href="render_out/tables/fig_02b_umap_isotype.xlsx">作图 Excel</a></p></li>
+<li><p>图 02e UMAP 突变：<a href="render_out/figures/02b_umap_shm.pdf">PDF</a>，<a href="render_out/figures/02b_umap_shm.png">PNG</a>，<a href="render_out/tables/fig_02b_umap_shm.xlsx">作图 Excel</a></p></li>
+<li><p>图 03 重链回收率：<a href="render_out/figures/03_b_lineage_recovery.pdf">PDF</a>，<a href="render_out/figures/03_b_lineage_recovery.png">PNG</a>，<a href="render_out/tables/fig_03_recovery.xlsx">作图 Excel</a></p></li>
+<li><p>图 04 亚型组成：<a href="render_out/figures/04_subtype_composition.pdf">PDF</a>，<a href="render_out/figures/04_subtype_composition.png">PNG</a>，<a href="render_out/tables/fig_04_composition.xlsx">作图 Excel</a></p></li>
+<li><p>图 05 重点亚型比例：<a href="render_out/figures/05_subtype_fraction_by_age.pdf">PDF</a>，<a href="render_out/figures/05_subtype_fraction_by_age.png">PNG</a>，<a href="render_out/tables/fig_05_subtype_fraction.xlsx">作图 Excel</a></p></li>
+<li><p>图 05s 其余亚型比例：<a href="render_out/figures/05s_subtype_fraction_other.pdf">PDF</a>，<a href="render_out/figures/05s_subtype_fraction_other.png">PNG</a>，<a href="render_out/tables/fig_05s_subtype_fraction.xlsx">作图 Excel</a></p></li>
+<li><p>图 06 全库扩增：<a href="render_out/figures/06_expanded_fraction_all.pdf">PDF</a>，<a href="render_out/figures/06_expanded_fraction_all.png">PNG</a>，<a href="render_out/tables/fig_06_expanded_all.xlsx">作图 Excel</a></p></li>
+<li><p>图 07 主要亚型内扩增：<a href="render_out/figures/07_expanded_fraction_by_subtype.pdf">PDF</a>，<a href="render_out/figures/07_expanded_fraction_by_subtype.png">PNG</a>，<a href="render_out/tables/fig_07_expanded_subtype.xlsx">作图 Excel</a></p></li>
+<li><p>图 07s 其余亚型内扩增：<a href="render_out/figures/07s_expanded_other_subtypes.pdf">PDF</a>，<a href="render_out/figures/07s_expanded_other_subtypes.png">PNG</a>，<a href="render_out/tables/fig_07s_expanded_subtype.xlsx">作图 Excel</a></p></li>
+<li><p>图 08 同种型构成：<a href="render_out/figures/08_isotype_by_subtype.pdf">PDF</a>，<a href="render_out/figures/08_isotype_by_subtype.png">PNG</a>，<a href="render_out/tables/fig_08_isotype_stack.xlsx">作图 Excel</a></p></li>
+<li><p>图 09 类别转换：<a href="render_out/figures/09_switched_by_main_subtype.pdf">PDF</a>，<a href="render_out/figures/09_switched_by_main_subtype.png">PNG</a>，<a href="render_out/tables/fig_09_switched.xlsx">作图 Excel</a></p></li>
+<li><p>图 10 IGHV 使用率：<a href="render_out/figures/10_ighv_usage.pdf">PDF</a>，<a href="render_out/figures/10_ighv_usage.png">PNG</a>，<a href="render_out/tables/fig_10_ighv.xlsx">作图 Excel</a></p></li>
+<li><p>图 11 主要亚型 SHM：<a href="render_out/figures/11_shm_main_subtypes.pdf">PDF</a>，<a href="render_out/figures/11_shm_main_subtypes.png">PNG</a>，<a href="render_out/tables/fig_11_shm_main.xlsx">作图 Excel</a></p></li>
+<li><p>图 12 Memory B 分同种型 SHM：<a href="render_out/figures/12_shm_memory_by_isotype.pdf">PDF</a>，<a href="render_out/figures/12_shm_memory_by_isotype.png">PNG</a>，<a href="render_out/tables/fig_12_memory_shm.xlsx">作图 Excel</a></p></li>
+<li><p>图 13 Top 10 克隆占比：<a href="render_out/figures/13_top10_fraction.pdf">PDF</a>，<a href="render_out/figures/13_top10_fraction.png">PNG</a>，<a href="render_out/tables/fig_13_top10.xlsx">作图 Excel</a></p></li>
+<li><p>图 14 Shannon：<a href="render_out/figures/14_shannon_main_subtypes.pdf">PDF</a>，<a href="render_out/figures/14_shannon_main_subtypes.png">PNG</a>，<a href="render_out/tables/fig_14_shannon.xlsx">作图 Excel</a></p></li>
+<li><p>图 16 同种型内扩增：<a href="render_out/figures/16_expansion_within_isotype.pdf">PDF</a>，<a href="render_out/figures/16_expansion_within_isotype.png">PNG</a>，<a href="render_out/tables/fig_16_within_isotype.xlsx">作图 Excel</a></p></li>
+<li><p>图 17 Plasma 分同种型 SHM：<a href="render_out/figures/17_shm_plasma_by_isotype.pdf">PDF</a>，<a href="render_out/figures/17_shm_plasma_by_isotype.png">PNG</a>，<a href="render_out/tables/fig_17_plasma_shm.xlsx">作图 Excel</a></p></li>
+<li><p>图 18 供者克隆大小：<a href="render_out/figures/18_clone_size_by_donor.pdf">PDF</a>，<a href="render_out/figures/18_clone_size_by_donor.png">PNG</a>，<a href="render_out/tables/fig_18_clone_size_by_donor.xlsx">作图 Excel</a></p></li>
+<li><p>图 19 年轻年老克隆大小：<a href="render_out/figures/19_clone_homeostasis.pdf">PDF</a>，<a href="render_out/figures/19_clone_homeostasis.png">PNG</a>，<a href="render_out/tables/fig_19_clone_homeostasis.xlsx">作图 Excel</a></p></li>
+<li><p>图 20 亚型克隆大小甜甜圈：<a href="render_out/figures/20_clone_size_donuts.pdf">PDF</a>，<a href="render_out/figures/20_clone_size_donuts.png">PNG</a>，<a href="render_out/tables/fig_20_clone_size_donuts.xlsx">作图 Excel</a></p></li>
+<li><p>图 21 扩增细胞亚型甜甜圈：<a href="render_out/figures/21_expanded_subtype_donuts.pdf">PDF</a>，<a href="render_out/figures/21_expanded_subtype_donuts.png">PNG</a>，<a href="render_out/tables/fig_21_expanded_subtype_donuts.xlsx">作图 Excel</a></p></li>
+<li><p>图 22 Gini-Simpson：<a href="render_out/figures/22_gini_simpson.pdf">PDF</a>，<a href="render_out/figures/22_gini_simpson.png">PNG</a>，<a href="render_out/tables/fig_22_gini.xlsx">作图 Excel</a></p></li>
+<li><p>图 23 STARTRAC 扩增：<a href="render_out/figures/23_startrac_expansion.pdf">PDF</a>，<a href="render_out/figures/23_startrac_expansion.png">PNG</a>，<a href="render_out/tables/fig_23_startrac_expansion.xlsx">作图 Excel</a></p></li>
+<li><p>图 24 STARTRAC 亚型间共享：<a href="render_out/figures/23_startrac_transition.pdf">PDF</a>，<a href="render_out/figures/23_startrac_transition.png">PNG</a>，<a href="render_out/tables/fig_23_startrac_transition.xlsx">作图 Excel</a></p></li>
+<li><p>图 25 IgG 浆细胞扩增：<a href="render_out/figures/25_igg_plasma_expanded.pdf">PDF</a>，<a href="render_out/figures/25_igg_plasma_expanded.png">PNG</a>，<a href="render_out/tables/fig_25_igg_plasma_expanded.xlsx">作图 Excel</a></p></li>
+<li><p>图 26 IgG 浆细胞 SHM：<a href="render_out/figures/26_igg_plasma_shm.pdf">PDF</a>，<a href="render_out/figures/26_igg_plasma_shm.png">PNG</a>，<a href="render_out/tables/fig_26_igg_plasma_shm.xlsx">作图 Excel</a></p></li>
+<li><p>图 27 IgG 浆细胞 Gini：<a href="render_out/figures/27_igg_plasma_gini.pdf">PDF</a>，<a href="render_out/figures/27_igg_plasma_gini.png">PNG</a>，<a href="render_out/tables/fig_27_igg_plasma_gini.xlsx">作图 Excel</a></p></li>
+</ul>
 <div class="cell">
 <details class="code-fold">
 <summary>查看分析代码</summary>
@@ -6172,11 +6206,11 @@ loaded via a namespace (and not attached):
 <span id="cb60-23"><a href="#cb60-23" aria-hidden="true" tabindex="-1"></a><span class="co">  message: false</span></span>
 <span id="cb60-24"><a href="#cb60-24" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
 <span id="cb60-25"><a href="#cb60-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-26"><a href="#cb60-26" aria-hidden="true" tabindex="-1"></a>**这是去掉 O6、O8 和 O11 的交付版本。** 本页包含正文和内嵌图。剔除的是 O6（LXY_SkullBM_240412）、O8（WLR220308_Z）和 O11（ZFR_SkullBM_240315）。保留年轻组 10 人（21–32 岁）和年老组 8 人（59–77 岁）。只去掉 O6 和 O11、保留 O8 的交付版本另行发布。BCR 是 B 细胞受体。这里只用每个 B 细胞的一条重链：看它属于哪种细胞、抗体是哪一类、有没有和别的细胞用同一套序列，以及 V 区突变高不高。后续实验重点是浆细胞，尤其是 IgG 浆细胞。</span>
+<span id="cb60-26"><a href="#cb60-26" aria-hidden="true" tabindex="-1"></a>本报告比较颅骨骨髓 B 细胞。已交付的 21 人队列里，本版去掉年老组 O6（LXY_SkullBM_240412）、O8（WLR220308_Z）和 O11（ZFR_SkullBM_240315），保留年轻组 10 人（21–32 岁）和年老组 8 人（59–77 岁）。BCR 是 B 细胞受体。这里只用每个 B 细胞的一条重链：看它属于哪种细胞、抗体是哪一类、有没有和别的细胞用同一套序列，以及 V 区突变高不高。后续实验重点是浆细胞，尤其是 IgG 浆细胞。</span>
 <span id="cb60-27"><a href="#cb60-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-28"><a href="#cb60-28" aria-hidden="true" tabindex="-1"></a>记忆 B 细胞参与再次应答，浆细胞负责分泌抗体；下文优先汇报这两类细胞。所有年龄比较都是一位供者一个点，不是把每个细胞当成独立样本。细胞类型用英文，与 UMAP 一致。图上的括号是**原始 p**（未做多重校正）。主要结论表里的参考 BH 按同一类比较放在一起校正，不据此写成已经确认的年龄效应。代码默认折叠，不看代码也可读结果。</span>
+<span id="cb60-28"><a href="#cb60-28" aria-hidden="true" tabindex="-1"></a>记忆 B 细胞参与再次应答，浆细胞负责分泌抗体；下文优先汇报这两类细胞。所有年龄比较都是一位供者一个点，不是把每个细胞当成独立样本。细胞类型用英文，与 UMAP 一致。图上的括号是**原始 p**（未做多重校正）；`age_tests.xlsx` 另有按检验 family 的**参考 BH**，正文不据此写成已确认的年龄效应。代码默认折叠，不看代码也可读结果。</span>
 <span id="cb60-29"><a href="#cb60-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-30"><a href="#cb60-30" aria-hidden="true" tabindex="-1"></a>样本是按约定逐个核对后去掉的。只去掉 O6 时，浆细胞比例仍不显著；再去掉 O11 后，这个比例的原始 p 约 0.045。O8 是年老组里浆细胞比例第二低、IgG 浆细胞多样性也最低的供者，本版把它也去掉，用来看结果是否更清楚。UMAP 仍用原来的坐标，只是不画这三位供者的细胞。本版不做供者之间的共享克隆，也不做公共抗原库比对。年轻组 4/10、年老组 8/8 为动脉瘤相关手术供者。下面是这一队列的观察，不是普遍的衰老机制。具体数字见主要结论。</span>
+<span id="cb60-30"><a href="#cb60-30" aria-hidden="true" tabindex="-1"></a>本版在去掉 O6 和 O11 之后，再去掉 O8。只去掉 O6 时，浆细胞比例并没有更清楚；去掉 O6 和 O11 后，这一比例的原始 p 约 0.045。UMAP 仍用原来的整合坐标，只是不画这三位供者的细胞。本版不做供者间共享克隆，也不做公共抗原库比对。年轻组 4/10、年老组 8/8 为动脉瘤相关手术供者。下述为本队列观察，不是普适衰老机制。具体数字见主要结论。</span>
 <span id="cb60-31"><a href="#cb60-31" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb60-34"><a href="#cb60-34" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
 <span id="cb60-35"><a href="#cb60-35" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: setup</span></span>
@@ -6293,7 +6327,7 @@ loaded via a namespace (and not attached):
 <span id="cb60-148"><a href="#cb60-148" aria-hidden="true" tabindex="-1"></a>design_table</span>
 <span id="cb60-149"><a href="#cb60-149" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb60-150"><a href="#cb60-150" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-151"><a href="#cb60-151" aria-hidden="true" tabindex="-1"></a>上表是本版纳入的供者。短编号仍是最初 21 人里的 Y1–Y10、O1–O11，因此没有 O6、O8 和 O11。被剔除的就是这三位，编号不重排。</span>
+<span id="cb60-151"><a href="#cb60-151" aria-hidden="true" tabindex="-1"></a>上表是本版纳入的供者。短编号仍是最初 21 人里的 Y1–Y10、O1–O11，因此没有 O6、O8 和 O11。被剔除的三位见 <span class="in">`study_design.xlsx`</span> 的 excluded 表。</span>
 <span id="cb60-152"><a href="#cb60-152" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb60-155"><a href="#cb60-155" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
 <span id="cb60-156"><a href="#cb60-156" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: labels-and-markers</span></span>
@@ -6579,7 +6613,7 @@ loaded via a namespace (and not attached):
 <span id="cb60-448"><a href="#cb60-448" aria-hidden="true" tabindex="-1"></a>  <span class="fu">subtype_fraction_blurb</span>(abundance_bh, <span class="st">&quot;Immature B&quot;</span>),</span>
 <span id="cb60-449"><a href="#cb60-449" aria-hidden="true" tabindex="-1"></a>  <span class="fu">subtype_fraction_blurb</span>(abundance_bh, <span class="st">&quot;Transitional B&quot;</span>),</span>
 <span id="cb60-450"><a href="#cb60-450" aria-hidden="true" tabindex="-1"></a>  <span class="fu">subtype_fraction_blurb</span>(abundance_bh, <span class="st">&quot;Plasma&quot;</span>),</span>
-<span id="cb60-451"><a href="#cb60-451" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;浆细胞（Plasma）比例见本图；记忆 B（Memory B）比例见图 05s 与主要结论表。Immature 与 Transitional 分界并不绝对；把这两类合并后的比较不作为主结论。&quot;</span>,</span>
+<span id="cb60-451"><a href="#cb60-451" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;浆细胞（Plasma）比例见本图；记忆 B（Memory B）比例见图 05s 与主要结论表。Immature 与 Transitional 分界并不绝对；合并 Immature+Transitional 的比较见 age_tests（family = abundance_sensitivity）。&quot;</span>,</span>
 <span id="cb60-452"><a href="#cb60-452" aria-hidden="true" tabindex="-1"></a>  <span class="at">sep =</span> <span class="st">&quot; &quot;</span></span>
 <span id="cb60-453"><a href="#cb60-453" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb60-454"><a href="#cb60-454" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
@@ -6600,7 +6634,7 @@ loaded via a namespace (and not attached):
 <span id="cb60-473"><a href="#cb60-473" aria-hidden="true" tabindex="-1"></a><span class="co">#| results: asis</span></span>
 <span id="cb60-474"><a href="#cb60-474" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb60-475"><a href="#cb60-475" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(</span>
-<span id="cb60-476"><a href="#cb60-476" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;图 05s. 每个点是一位供者，纵轴为占该供者 B 系细胞的百分比；读法与图 05 相同。图上括号是原始 p。&quot;</span>,</span>
+<span id="cb60-476"><a href="#cb60-476" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;图 05s. 每个点是一位供者，纵轴为占该供者 B 系细胞的百分比；读法与图 05 相同（图括号为原始 p，同类检验参考 BH 见图注句式与 age_tests）。&quot;</span>,</span>
 <span id="cb60-477"><a href="#cb60-477" aria-hidden="true" tabindex="-1"></a>  <span class="fu">subtype_fraction_blurb</span>(abundance_bh, <span class="st">&quot;Memory B&quot;</span>),</span>
 <span id="cb60-478"><a href="#cb60-478" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;其余分面（Naive B、Pro-B 等）供描述性比较；浆细胞比例见图 05。&quot;</span>,</span>
 <span id="cb60-479"><a href="#cb60-479" aria-hidden="true" tabindex="-1"></a>  <span class="at">sep =</span> <span class="st">&quot; &quot;</span></span>
@@ -7486,7 +7520,7 @@ loaded via a namespace (and not attached):
 <span id="cb60-1399"><a href="#cb60-1399" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb60-1400"><a href="#cb60-1400" aria-hidden="true" tabindex="-1"></a><span class="fu">## 主要结论</span></span>
 <span id="cb60-1401"><a href="#cb60-1401" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-1402"><a href="#cb60-1402" aria-hidden="true" tabindex="-1"></a>下表是去掉 O6、O8、O11 之后的供者中位数，年轻组在前、年老组在后。只有“占 B 系细胞比例”和 Immature B 比例以全部 B 系细胞为分母。扩增比例的分母是该亚型或该比较范围内的重链细胞。IgG 占浆细胞比例的分母是有可用重链的浆细胞。表在本页内，不另附文件。图上括号是原始 p。p 小于 0.05 只说明本队列里这一项比较突出，还不是定论。</span>
+<span id="cb60-1402"><a href="#cb60-1402" aria-hidden="true" tabindex="-1"></a>下表是去掉 O6、O8、O11 之后的供者中位数，年轻组在前、年老组在后。只有“占 B 系细胞比例”和 Immature B 比例以全部 B 系细胞为分母。扩增比例的分母是该亚型或该比较范围内的重链细胞。IgG 占浆细胞比例的分母是有可用重链的浆细胞。图上括号是原始 p，表里另有同 family 的参考 BH。原始 p &lt; 0.05 只记为探索性信号。完整比较见 <span class="in">`age_tests.xlsx`</span>。</span>
 <span id="cb60-1403"><a href="#cb60-1403" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb60-1404"><a href="#cb60-1404" aria-hidden="true" tabindex="-1"></a>**浆细胞**  </span>
 <span id="cb60-1405"><a href="#cb60-1405" aria-hidden="true" tabindex="-1"></a>图 05 看浆细胞占 B 细胞的比例：大约 5.6% 到 23.8%，10 位年轻供者和 8 位年老供者，原始 p 约 0.015。年老组更高，但这是比例，不能说骨髓里的浆细胞数量一定增加了。图 07 看浆细胞里的扩增细胞：大约 6.5% 到 12.5%，原始 p 约 0.15，还不能说扩增更强。图 11 的 V 区突变两组接近，原始 p = <span class="in">`r p3(tests$p_value[tests$metric == &quot;Cell-median SHM, Plasma&quot;][1])`</span>。浆细胞 Gini–Simpson 的原始 p = <span class="in">`r sprintf(&quot;%.4f&quot;, tests$p_value[tests$metric == &quot;Gini-Simpson, Plasma&quot;][1])`</span>，参考 BH = <span class="in">`r sprintf(&quot;%.4f&quot;, tests$p_bh[tests$metric == &quot;Gini-Simpson, Plasma&quot;][1])`</span>。浆细胞 Shannon 的原始 p = <span class="in">`r sprintf(&quot;%.4f&quot;, tests$p_value[tests$metric == &quot;Plasma; primary; shannon&quot;][1])`</span>，参考 BH = <span class="in">`r sprintf(&quot;%.4f&quot;, tests$p_bh[tests$metric == &quot;Plasma; primary; shannon&quot;][1])`</span>。这两项多样性都受回收到的浆细胞数影响，不能单独当成年龄效应。</span>
@@ -7935,38 +7969,52 @@ loaded via a namespace (and not attached):
 <span id="cb60-1874"><a href="#cb60-1874" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb60-1875"><a href="#cb60-1875" aria-hidden="true" tabindex="-1"></a>图 02e. 颜色是重链 V 区突变百分比。灰色是突变值缺失。</span>
 <span id="cb60-1876"><a href="#cb60-1876" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-1877"><a href="#cb60-1877" aria-hidden="true" tabindex="-1"></a><span class="fu">## 阅读说明 {.unnumbered}</span></span>
+<span id="cb60-1877"><a href="#cb60-1877" aria-hidden="true" tabindex="-1"></a><span class="fu">## 图表数据 {.unnumbered}</span></span>
 <span id="cb60-1878"><a href="#cb60-1878" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-1879"><a href="#cb60-1879" aria-hidden="true" tabindex="-1"></a>这一页是去掉 O6、O8、O11 的交付报告。图已经嵌在正文里。这里不提供 PDF、PNG、Excel 或 ZIP 下载。</span>
+<span id="cb60-1879"><a href="#cb60-1879" aria-hidden="true" tabindex="-1"></a>供者短编号和样本的对应表在 <span class="co">[</span><span class="ot">study_design.xlsx</span><span class="co">](render_out/tables/study_design.xlsx)</span>。每张图的 PDF、PNG 和作图用 Excel 列在 <span class="co">[</span><span class="ot">figure_table_map.xlsx</span><span class="co">](render_out/tables/figure_table_map.xlsx)</span>。下载时请保持 <span class="in">`tables/`</span> 和 <span class="in">`figures/`</span> 的相对位置，链接才打得开。</span>
 <span id="cb60-1880"><a href="#cb60-1880" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb60-1883"><a href="#cb60-1883" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb60-1884"><a href="#cb60-1884" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: manifest</span></span>
-<span id="cb60-1885"><a href="#cb60-1885" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-1886"><a href="#cb60-1886" aria-hidden="true" tabindex="-1"></a>session_txt <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
-<span id="cb60-1887"><a href="#cb60-1887" aria-hidden="true" tabindex="-1"></a>  <span class="fu">paste</span>(<span class="st">&quot;Quarto:&quot;</span>, <span class="fu">system2</span>(<span class="st">&quot;quarto&quot;</span>, <span class="st">&quot;--version&quot;</span>, <span class="at">stdout =</span> <span class="cn">TRUE</span>)),</span>
-<span id="cb60-1888"><a href="#cb60-1888" aria-hidden="true" tabindex="-1"></a>  <span class="fu">capture.output</span>(<span class="fu">sessionInfo</span>())</span>
-<span id="cb60-1889"><a href="#cb60-1889" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb60-1890"><a href="#cb60-1890" aria-hidden="true" tabindex="-1"></a><span class="fu">writeLines</span>(session_txt, <span class="fu">file.path</span>(rdata_dir, <span class="st">&quot;sessionInfo.txt&quot;</span>))</span>
-<span id="cb60-1891"><a href="#cb60-1891" aria-hidden="true" tabindex="-1"></a>manifest_paths <span class="ot">&lt;-</span> <span class="fu">list.files</span>(output_dir, <span class="at">recursive =</span> <span class="cn">TRUE</span>, <span class="at">full.names =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb60-1892"><a href="#cb60-1892" aria-hidden="true" tabindex="-1"></a>manifest_paths <span class="ot">&lt;-</span> manifest_paths[<span class="sc">!</span><span class="fu">grepl</span>(<span class="st">&quot;shm/|file_manifest.xlsx&quot;</span>, manifest_paths)]</span>
-<span id="cb60-1893"><a href="#cb60-1893" aria-hidden="true" tabindex="-1"></a><span class="fu">write_xlsx</span>(<span class="fu">tibble</span>(<span class="at">path =</span> manifest_paths, <span class="at">bytes =</span> <span class="fu">file.info</span>(manifest_paths)<span class="sc">$</span>size), <span class="st">&quot;file_manifest&quot;</span>)</span>
-<span id="cb60-1894"><a href="#cb60-1894" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb60-1895"><a href="#cb60-1895" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-1896"><a href="#cb60-1896" aria-hidden="true" tabindex="-1"></a><span class="fu">## 运行环境 {.unnumbered}</span></span>
-<span id="cb60-1897"><a href="#cb60-1897" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-1898"><a href="#cb60-1898" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">details</span><span class="dt">&gt;</span></span>
-<span id="cb60-1899"><a href="#cb60-1899" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">summary</span><span class="dt">&gt;</span>完整 sessionInfo<span class="dt">&lt;/</span><span class="kw">summary</span><span class="dt">&gt;</span></span>
-<span id="cb60-1900"><a href="#cb60-1900" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-1903"><a href="#cb60-1903" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb60-1904"><a href="#cb60-1904" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: session-print</span></span>
-<span id="cb60-1905"><a href="#cb60-1905" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
-<span id="cb60-1906"><a href="#cb60-1906" aria-hidden="true" tabindex="-1"></a><span class="co">#| results: asis</span></span>
-<span id="cb60-1907"><a href="#cb60-1907" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n\n</span><span class="st">```</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
-<span id="cb60-1908"><a href="#cb60-1908" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">paste</span>(session_txt, <span class="at">collapse =</span> <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>))</span>
-<span id="cb60-1909"><a href="#cb60-1909" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">```</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb60-1884"><a href="#cb60-1884" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: figure-links</span></span>
+<span id="cb60-1885"><a href="#cb60-1885" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
+<span id="cb60-1886"><a href="#cb60-1886" aria-hidden="true" tabindex="-1"></a><span class="co">#| results: asis</span></span>
+<span id="cb60-1887"><a href="#cb60-1887" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n\n</span><span class="st">&quot;</span>)</span>
+<span id="cb60-1888"><a href="#cb60-1888" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq_len</span>(<span class="fu">nrow</span>(figure_index))) {</span>
+<span id="cb60-1889"><a href="#cb60-1889" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="fu">sprintf</span>(</span>
+<span id="cb60-1890"><a href="#cb60-1890" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;- 图 %s %s：[PDF](render_out/figures/%s)，[PNG](render_out/figures/%s)，[作图 Excel](render_out/tables/%s)</span><span class="sc">\n\n</span><span class="st">&quot;</span>,</span>
+<span id="cb60-1891"><a href="#cb60-1891" aria-hidden="true" tabindex="-1"></a>    figure_index<span class="sc">$</span>figure_id[i], figure_index<span class="sc">$</span>title[i],</span>
+<span id="cb60-1892"><a href="#cb60-1892" aria-hidden="true" tabindex="-1"></a>    figure_index<span class="sc">$</span>pdf[i], figure_index<span class="sc">$</span>png[i], figure_index<span class="sc">$</span>workbook[i]</span>
+<span id="cb60-1893"><a href="#cb60-1893" aria-hidden="true" tabindex="-1"></a>  ))</span>
+<span id="cb60-1894"><a href="#cb60-1894" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb60-1895"><a href="#cb60-1895" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb60-1896"><a href="#cb60-1896" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-1899"><a href="#cb60-1899" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb60-1900"><a href="#cb60-1900" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: manifest</span></span>
+<span id="cb60-1901"><a href="#cb60-1901" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-1902"><a href="#cb60-1902" aria-hidden="true" tabindex="-1"></a>session_txt <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb60-1903"><a href="#cb60-1903" aria-hidden="true" tabindex="-1"></a>  <span class="fu">paste</span>(<span class="st">&quot;Quarto:&quot;</span>, <span class="fu">system2</span>(<span class="st">&quot;quarto&quot;</span>, <span class="st">&quot;--version&quot;</span>, <span class="at">stdout =</span> <span class="cn">TRUE</span>)),</span>
+<span id="cb60-1904"><a href="#cb60-1904" aria-hidden="true" tabindex="-1"></a>  <span class="fu">capture.output</span>(<span class="fu">sessionInfo</span>())</span>
+<span id="cb60-1905"><a href="#cb60-1905" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb60-1906"><a href="#cb60-1906" aria-hidden="true" tabindex="-1"></a><span class="fu">writeLines</span>(session_txt, <span class="fu">file.path</span>(rdata_dir, <span class="st">&quot;sessionInfo.txt&quot;</span>))</span>
+<span id="cb60-1907"><a href="#cb60-1907" aria-hidden="true" tabindex="-1"></a>manifest_paths <span class="ot">&lt;-</span> <span class="fu">list.files</span>(output_dir, <span class="at">recursive =</span> <span class="cn">TRUE</span>, <span class="at">full.names =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb60-1908"><a href="#cb60-1908" aria-hidden="true" tabindex="-1"></a>manifest_paths <span class="ot">&lt;-</span> manifest_paths[<span class="sc">!</span><span class="fu">grepl</span>(<span class="st">&quot;shm/|file_manifest.xlsx&quot;</span>, manifest_paths)]</span>
+<span id="cb60-1909"><a href="#cb60-1909" aria-hidden="true" tabindex="-1"></a><span class="fu">write_xlsx</span>(<span class="fu">tibble</span>(<span class="at">path =</span> manifest_paths, <span class="at">bytes =</span> <span class="fu">file.info</span>(manifest_paths)<span class="sc">$</span>size), <span class="st">&quot;file_manifest&quot;</span>)</span>
 <span id="cb60-1910"><a href="#cb60-1910" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb60-1911"><a href="#cb60-1911" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-1912"><a href="#cb60-1912" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">details</span><span class="dt">&gt;</span></span>
+<span id="cb60-1912"><a href="#cb60-1912" aria-hidden="true" tabindex="-1"></a><span class="fu">## 运行环境 {.unnumbered}</span></span>
+<span id="cb60-1913"><a href="#cb60-1913" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-1914"><a href="#cb60-1914" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">details</span><span class="dt">&gt;</span></span>
+<span id="cb60-1915"><a href="#cb60-1915" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">summary</span><span class="dt">&gt;</span>完整 sessionInfo<span class="dt">&lt;/</span><span class="kw">summary</span><span class="dt">&gt;</span></span>
+<span id="cb60-1916"><a href="#cb60-1916" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-1919"><a href="#cb60-1919" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb60-1920"><a href="#cb60-1920" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: session-print</span></span>
+<span id="cb60-1921"><a href="#cb60-1921" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
+<span id="cb60-1922"><a href="#cb60-1922" aria-hidden="true" tabindex="-1"></a><span class="co">#| results: asis</span></span>
+<span id="cb60-1923"><a href="#cb60-1923" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n\n</span><span class="st">```</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb60-1924"><a href="#cb60-1924" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">paste</span>(session_txt, <span class="at">collapse =</span> <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>))</span>
+<span id="cb60-1925"><a href="#cb60-1925" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">```</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb60-1926"><a href="#cb60-1926" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb60-1927"><a href="#cb60-1927" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-1928"><a href="#cb60-1928" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">details</span><span class="dt">&gt;</span></span>
 </code></pre></div><button title="复制到剪贴板" class="code-copy-button" data-in-quarto-modal><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->

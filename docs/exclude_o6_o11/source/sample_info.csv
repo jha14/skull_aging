@@ -1,0 +1,22 @@
+sample_id,age_group,sex,age,notes
+WHH_BM231121,Young,M,21,skull BM; brainstem endodermal cyst
+MYX_SkullBM_240711,Young,F,21,skull BM; unruptured aneurysm
+MJ_SkullBM_240626,Young,F,27,skull BM; unruptured aneurysm
+JLX_SkullBM_240228,Young,F,29,skull BM; tuberculum sellae meningioma
+CZJ_230711,Young,F,29,skull BM; MCA aneurysm
+STX_SkullBM_240229,Young,M,30,skull BM; CPA schwannoma
+MY_SkullBM_240304,Young,F,30,skull BM; CPA epidermoid cyst
+ZYY_SkullBM_240226,Young,F,30,skull BM; CPA epidermoid cyst
+ZM_SkullBM_240620,Young,F,30,skull BM; aneurysm
+CMY230607,Young,F,32,skull BM; craniovertebral junction mass
+CYM_SkullBM_240322,Old,F,59,skull BM; MCA aneurysm
+LXY_SkullBM_240412,Old,F,60,skull BM; PICA aneurysm
+ZFR_SkullBM_240315,Old,F,60,skull BM; aneurysm
+YSM230412,Old,F,60,skull BM; intracranial aneurysm
+WLR220308_Z,Old,F,60,skull BM; MCA aneurysm
+SAD_SkullBM_240321,Old,F,62,skull BM; intracranial aneurysm
+220401M62,Old,M,62,skull BM; right MCA aneurysm
+220401F65,Old,F,65,skull BM; multiple intracranial aneurysms
+LFY_231108,Old,F,68,skull BM; intracranial aneurysm
+YLH_SkullBM_2403048,Old,F,68,skull BM; MCA aneurysm
+LWN_SkullBM_240407,Old,M,77,skull BM; PComm aneurysm

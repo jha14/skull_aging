@@ -1,0 +1,33 @@
+figure_id,title,workbook,unit,pdf,png
+01,Marker 点图,fig_01_markers.xlsx,见 dictionary sheet,01_marker_dotplot.pdf,01_marker_dotplot.png
+02,亚型 UMAP,fig_02_umap.xlsx,见 dictionary sheet,02_umap_subtype.pdf,02_umap_subtype.png
+02b,UMAP 年龄,fig_02b_umap_age.xlsx,见 dictionary sheet,02b_umap_age.pdf,02b_umap_age.png
+02c,UMAP 克隆大小,fig_02b_umap_clone.xlsx,见 dictionary sheet,02b_umap_clone.pdf,02b_umap_clone.png
+02d,UMAP 同种型,fig_02b_umap_isotype.xlsx,见 dictionary sheet,02b_umap_isotype.pdf,02b_umap_isotype.png
+02e,UMAP 突变,fig_02b_umap_shm.xlsx,见 dictionary sheet,02b_umap_shm.pdf,02b_umap_shm.png
+03,重链回收率,fig_03_recovery.xlsx,见 dictionary sheet,03_b_lineage_recovery.pdf,03_b_lineage_recovery.png
+04,亚型组成,fig_04_composition.xlsx,见 dictionary sheet,04_subtype_composition.pdf,04_subtype_composition.png
+05,重点亚型比例,fig_05_subtype_fraction.xlsx,见 dictionary sheet,05_subtype_fraction_by_age.pdf,05_subtype_fraction_by_age.png
+05s,其余亚型比例,fig_05s_subtype_fraction.xlsx,见 dictionary sheet,05s_subtype_fraction_other.pdf,05s_subtype_fraction_other.png
+06,全库扩增,fig_06_expanded_all.xlsx,见 dictionary sheet,06_expanded_fraction_all.pdf,06_expanded_fraction_all.png
+07,主要亚型内扩增,fig_07_expanded_subtype.xlsx,见 dictionary sheet,07_expanded_fraction_by_subtype.pdf,07_expanded_fraction_by_subtype.png
+07s,其余亚型内扩增,fig_07s_expanded_subtype.xlsx,见 dictionary sheet,07s_expanded_other_subtypes.pdf,07s_expanded_other_subtypes.png
+08,同种型构成,fig_08_isotype_stack.xlsx,见 dictionary sheet,08_isotype_by_subtype.pdf,08_isotype_by_subtype.png
+09,类别转换,fig_09_switched.xlsx,见 dictionary sheet,09_switched_by_main_subtype.pdf,09_switched_by_main_subtype.png
+10,IGHV 使用率,fig_10_ighv.xlsx,见 dictionary sheet,10_ighv_usage.pdf,10_ighv_usage.png
+11,主要亚型 SHM,fig_11_shm_main.xlsx,见 dictionary sheet,11_shm_main_subtypes.pdf,11_shm_main_subtypes.png
+12,Memory B 分同种型 SHM,fig_12_memory_shm.xlsx,见 dictionary sheet,12_shm_memory_by_isotype.pdf,12_shm_memory_by_isotype.png
+13,Top 10 克隆占比,fig_13_top10.xlsx,见 dictionary sheet,13_top10_fraction.pdf,13_top10_fraction.png
+14,Shannon,fig_14_shannon.xlsx,见 dictionary sheet,14_shannon_main_subtypes.pdf,14_shannon_main_subtypes.png
+16,同种型内扩增,fig_16_within_isotype.xlsx,见 dictionary sheet,16_expansion_within_isotype.pdf,16_expansion_within_isotype.png
+17,Plasma 分同种型 SHM,fig_17_plasma_shm.xlsx,见 dictionary sheet,17_shm_plasma_by_isotype.pdf,17_shm_plasma_by_isotype.png
+18,供者克隆大小,fig_18_clone_size_by_donor.xlsx,见 dictionary sheet,18_clone_size_by_donor.pdf,18_clone_size_by_donor.png
+19,年轻年老克隆大小,fig_19_clone_homeostasis.xlsx,见 dictionary sheet,19_clone_homeostasis.pdf,19_clone_homeostasis.png
+20,亚型克隆大小甜甜圈,fig_20_clone_size_donuts.xlsx,见 dictionary sheet,20_clone_size_donuts.pdf,20_clone_size_donuts.png
+21,扩增细胞亚型甜甜圈,fig_21_expanded_subtype_donuts.xlsx,见 dictionary sheet,21_expanded_subtype_donuts.pdf,21_expanded_subtype_donuts.png
+22,Gini-Simpson,fig_22_gini.xlsx,见 dictionary sheet,22_gini_simpson.pdf,22_gini_simpson.png
+23,STARTRAC 扩增,fig_23_startrac_expansion.xlsx,见 dictionary sheet,23_startrac_expansion.pdf,23_startrac_expansion.png
+24,STARTRAC 亚型间共享,fig_23_startrac_transition.xlsx,见 dictionary sheet,23_startrac_transition.pdf,23_startrac_transition.png
+25,IgG 浆细胞扩增,fig_25_igg_plasma_expanded.xlsx,见 dictionary sheet,25_igg_plasma_expanded.pdf,25_igg_plasma_expanded.png
+26,IgG 浆细胞 SHM,fig_26_igg_plasma_shm.xlsx,见 dictionary sheet,26_igg_plasma_shm.pdf,26_igg_plasma_shm.png
+27,IgG 浆细胞 Gini,fig_27_igg_plasma_gini.xlsx,见 dictionary sheet,27_igg_plasma_gini.pdf,27_igg_plasma_gini.png

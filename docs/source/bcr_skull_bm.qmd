@@ -23,11 +23,11 @@ execute:
   message: false
 ---
 
-本报告比较颅骨骨髓 B 细胞。已交付的 21 人队列里，本版去掉年老组 O6（LXY_SkullBM_240412）和 O11（ZFR_SkullBM_240315），保留年轻组 10 人（21–32 岁）和年老组 9 人（59–77 岁）。BCR 是 B 细胞受体。这里只用每个 B 细胞的一条重链：看它属于哪种细胞、抗体是哪一类、有没有和别的细胞用同一套序列，以及 V 区突变高不高。后续实验重点是浆细胞，尤其是 IgG 浆细胞。
+本报告比较 21 位开颅手术供者的颅骨骨髓 B 细胞：年轻组 10 人（21–32 岁），年老组 11 人（59–77 岁）。BCR 是 B 细胞受体。这里只用每个 B 细胞的一条重链：看它属于哪种细胞、抗体是哪一类、有没有和别的细胞用同一套序列，以及 V 区突变高不高。
 
 记忆 B 细胞参与再次应答，浆细胞负责分泌抗体；下文优先汇报这两类细胞。所有年龄比较都是一位供者一个点，不是把每个细胞当成独立样本。细胞类型用英文，与 UMAP 一致。图上的括号是**原始 p**（未做多重校正）；`age_tests.xlsx` 另有按检验 family 的**参考 BH**，正文不据此写成已确认的年龄效应。代码默认折叠，不看代码也可读结果。
 
-样本剔除按事先约定的顺序核对已交付结果：只去掉 O6 时，浆细胞占 B 系细胞的比例仍不显著（原始 p≈0.12）；再去掉 O11 后，该比例原始 p≈0.046。O8 没有去掉，因为继续删除后浆细胞扩增和 V 区突变仍不到 0.05。UMAP 仍用原来的整合坐标，只是不画 O6 和 O11 的细胞。本版不做供者间共享克隆，也不做公共抗原库比对。年轻组 4/10、年老组 9/9 为动脉瘤相关手术供者。下述为本队列观察，不是普适衰老机制。具体数字见主要结论。
+这批颅骨骨髓样本里，年老组记忆 B 细胞的重链 V 区突变比例较高；IgG 记忆 B 细胞也有同方向观察，仍需验证。记忆 B 与浆细胞中，年老组扩增细胞比例的中位数多数略高，但两组供者数值重叠，现有结果还不足以确认扩增增强。浆细胞整体突变比例未见明确组间差异。年老组回收到的浆细胞较多，克隆多样性的比较须结合回收深度（见主要结论与图 22、图 14）。年轻组 4/10、年老组 11/11 为动脉瘤相关手术供者，两组原发疾病构成不同；下述为**本队列的年龄组观察与待验证线索**，不是普适衰老机制。
 
 ```{r}
 #| label: setup
@@ -84,7 +84,7 @@ if (isTRUE(run_preprocessing)) {
 
 ## 样本和细胞标签
 
-这一节先确认比的是谁，以及图上的细胞名称是什么意思。年龄和分组只用颅骨骨髓。编号仍按最初 21 人的顺序，O6 和 O11 不进入本版统计和图。保留年轻组 10 人（21–32 岁）、年老组 9 人（59–77 岁）。
+这一节先确认比的是谁，以及图上的细胞名称是什么意思。年龄和分组只用颅骨骨髓。21 位供者里，年轻组 10 人（21–32 岁），年老组 11 人（59–77 岁）。两组的原发疾病不均衡，文末一起说明。
 
 细胞名称和图上的英文标签一致：
 
@@ -107,10 +107,6 @@ sample_info <- read_csv(file.path(project_dir, "codes/sample_info.csv"), show_co
   group_by(age_group) %>%
   mutate(donor_label = paste0(if_else(as.character(age_group) == "Young", "Y", "O"), row_number())) %>%
   ungroup()
-exclude_donor_labels <- c("O6", "O11")
-sample_info_all <- sample_info %>%
-  mutate(included = !donor_label %in% exclude_donor_labels)
-sample_info <- sample_info_all %>% filter(included)
 cluster_map <- read_csv(file.path(project_dir, "codes/cluster_lineage.csv"), show_col_types = FALSE) %>%
   mutate(
     cluster = as.character(cluster),
@@ -128,15 +124,11 @@ stopifnot(
 
 design_table <- sample_info %>%
   count(age_group, aneurysm, sex, name = "n_donors")
-write_xlsx(list(
-  donors = sample_info,
-  excluded = sample_info_all %>% filter(!included),
-  design = design_table
-), "study_design")
+write_xlsx(list(donors = sample_info, design = design_table), "study_design")
 design_table
 ```
 
-上表是本版纳入的供者。短编号仍是最初 21 人里的 Y1–Y10、O1–O11，因此没有 O6 和 O11。被剔除的两位见 `study_design.xlsx` 的 excluded 表。
+21 位供者的年龄、性别和短编号见上面的表。图里的 Y1–Y10、O1–O11 就是这张表里的顺序。
 
 ```{r}
 #| label: labels-and-markers
@@ -147,17 +139,8 @@ obj <- readRDS(file.path(project_dir, "data/scRNA_harmony_luguB_quan.rds"))
 obj$cluster <- as.character(obj$seurat_clusters)
 obj$cell_subtype <- cluster_map$cell_subtype[match(obj$cluster, cluster_map$cluster)]
 obj$lineage <- cluster_map$lineage[match(obj$cluster, cluster_map$cluster)]
-obj$age_group <- sample_info_all$age_group[match(obj$sample_id, sample_info_all$sample_id)]
-stopifnot(!anyNA(obj$cell_subtype), all(obj$sample_id %in% sample_info_all$sample_id))
-full_emb <- as.data.frame(Embeddings(obj, "umap"))
-colnames(full_emb)[1:2] <- c("UMAP_1", "UMAP_2")
-umap_span <- max(diff(range(full_emb$UMAP_1)), diff(range(full_emb$UMAP_2))) * 1.12
-umap_limits <- list(
-  x = mean(range(full_emb$UMAP_1)) + c(-.5, .5) * umap_span,
-  y = mean(range(full_emb$UMAP_2)) + c(-.5, .5) * umap_span
-)
-obj <- obj[, obj$sample_id %in% sample_info$sample_id]
-stopifnot(all(obj$sample_id %in% sample_info$sample_id))
+obj$age_group <- sample_info$age_group[match(obj$sample_id, sample_info$sample_id)]
+stopifnot(!anyNA(obj$cell_subtype), all(obj$sample_id %in% sample_info$sample_id))
 
 markers <- intersect(
   c("CD34", "DNTT", "VPREB1", "IGLL1", "RAG1", "MME", "MKI67", "TCL1A", "MS4A1",
@@ -192,8 +175,12 @@ emb$barcode <- rownames(Embeddings(obj, "umap"))
 emb$cell_subtype <- obj$cell_subtype
 emb$age_group <- obj$age_group
 emb$lineage <- obj$lineage
-emb$sample_id <- obj$sample_id
-# Axis limits were fixed on the original 21-donor embedding before O6 and O11 were removed.
+# Equal ranges give a square panel without stretching or changing the embedding.
+umap_span <- max(diff(range(emb$UMAP_1)), diff(range(emb$UMAP_2))) * 1.12
+umap_limits <- list(
+  x = mean(range(emb$UMAP_1)) + c(-.5, .5) * umap_span,
+  y = mean(range(emb$UMAP_2)) + c(-.5, .5) * umap_span
+)
 label_xy <- emb %>%
   filter(lineage != "Non-B") %>%
   group_by(cell_subtype) %>%
@@ -216,7 +203,7 @@ save_plot(p_umap, "02_umap_subtype", 4.6, 4.6)
 print(p_umap)
 ```
 
-图 02. 每个点是一个细胞。距离近表示基因表达相似，不是实验测到的物理距离。颜色是上面的细胞类型，灰色是 CD3D+ T，后面不再使用。O6 和 O11 的细胞已从图上去掉；坐标范围仍是原来 21 人整合 UMAP 的范围，没有重新计算嵌入。
+图 02. 每个点是一个细胞。距离近表示基因表达相似，不是实验测到的物理距离。颜色是上面的细胞类型，灰色是 CD3D+ T，后面不再使用。
 
 ## 重链选择
 
@@ -1193,7 +1180,7 @@ save_plot(p_shm, "11_shm_main_subtypes", 5.2, 2.2)
 print(p_shm)
 ```
 
-图 11. 每个点是一位供者，纵轴是该亚型细胞的 IGHV 区突变中位数。括号是本版原始 p。Naive B 通常接近 0。Plasma 的组间差异以括号和主要结论表为准。
+图 11. 每个点是一位供者，纵轴是该亚型细胞的 IGHV 区突变中位数。Memory B 年老组供者中位数约 4.51%→5.21%（Welch，原始 p≈0.0085；`shm_cell` 家族参考 BH≈0.026），记为探索性信号。Naive B 两组中位数均为 0。Plasma 约 9.38%→9.67%（原始 p≈0.40），未见明确组间差异。
 
 ```{r}
 #| label: shm-memory-isotype
@@ -1217,101 +1204,132 @@ write_xlsx(list(
 ), "shm")
 ```
 
-图 12. 只看 Memory B，再按 IgM、IgG、IgA 分开。括号是本版原始 p。IgG 记忆 B 的供者中位数和 p 见主要结论表。
+图 12. 只看 Memory B，再按 IgM、IgG、IgA 分开。IgG 层约 6.39%→7.49%（原始 p≈0.029，参考 BH≈0.087；各 8 位供者），作为后续验证线索。IgM、IgA 分层未见与 IgG 同强度的组间差异。
 
-## IgG 浆细胞
+## 共享克隆和抗原序列
 
-浆细胞分泌的抗体不都是同一类。这一节只留抗体类型为 IgG 的浆细胞，看三件和前面 Memory B 相同的事：有没有克隆扩增、V 区突变得高不高、克隆是分散还是挤在少数序列上。每位供者先在自己的 IgG 浆细胞里汇总成一个数，再比较年轻组和年老组。IgG 浆细胞少于 10 个的供者不进入检验。突变描述的是序列和种系 V 区差多少，不是抗体结合得紧不紧，也不是分泌量。
+这一节回答两个具体问题。第一，不同供者之间有没有完全相同的重链。第二，这些重链是否和公共数据库里已经记录的抗体相同。
+
+比对规则很窄：IGHV 基因相同，并且 CDR3 氨基酸完全相同，才算命中。不是整条抗体序列，也不能说明这个细胞真的结合数据库里写的抗原。用的库是 CoV-AbDab 和 IEDB 里的人源重链。
 
 ```{r}
-#| label: igg-plasma
-#| fig-width: 1.85
-#| fig-height: 2.15
+#| label: public-antigen
 
-igg_plasma <- analysis %>%
-  filter(cell_subtype == "Plasma", isotype_group == "IGHG", !is.na(clone_id))
-igg_plasma_metrics <- donor_clone_metrics(igg_plasma, "clone_id") %>%
-  filter(n_bcr >= min_subtype_cells) %>%
-  mutate(gini = purrr::map_dbl(sample_id, function(s) {
-    gini_simpson(igg_plasma$clone_id[igg_plasma$sample_id == s])
-  }))
-for (metric in c("expanded_frac", "top10_frac", "shannon")) {
-  stat_tests[[length(stat_tests) + 1]] <- wilcox_age(
-    igg_plasma_metrics, metric, paste("IGHG Plasma", metric, sep = "; "), "igg_plasma", min_donors
+exact_public <- analysis %>%
+  filter(!v_ambiguous, aa_sequence_ok(cdr3_aa)) %>%
+  distinct(v_gene, cdr3_aa, sample_id) %>%
+  count(v_gene, cdr3_aa, name = "n_donors") %>%
+  filter(n_donors >= 2)
+near_public <- near_public_pairs(analysis)
+near_cell_keys <- unique(c(
+  paste(near_public$sample_1, near_public$v_gene, near_public$cdr3_1, sep = "|"),
+  paste(near_public$sample_2, near_public$v_gene, near_public$cdr3_2, sep = "|")
+))
+analysis <- analysis %>%
+  mutate(
+    public_exact = paste(v_gene, cdr3_aa) %in% paste(exact_public$v_gene, exact_public$cdr3_aa),
+    public_near = paste(sample_id, v_gene, cdr3_aa, sep = "|") %in% near_cell_keys
   )
+public_donor <- analysis %>%
+  group_by(sample_id, age_group) %>%
+  summarise(n_bcr = n(), exact_frac = mean(public_exact), near_frac = mean(public_near), .groups = "drop")
+stat_tests[[length(stat_tests) + 1]] <- wilcox_age(
+  public_donor %>% filter(sample_id %in% library_donors), "exact_frac",
+  "Cells in exact shared heavy chains", "public", min_donors
+)
+
+cov_complete <- file.path(project_dir, "data/reference/CoV-AbDab_2024-02-08.csv")
+cov_truncated <- file.path(project_dir, "data/reference/CoV-AbDab_080224.csv")
+cov_path <- if (file.exists(cov_complete)) cov_complete else cov_truncated
+iedb_path <- file.path(project_dir, "data/reference/bcr_full_v3.csv")
+antigen_status <- "not run"
+antigen_hits <- tibble()
+query <- analysis %>%
+  filter(!v_ambiguous) %>%
+  bind_cols(query_cdr3_keys(.$cdr3_aa)) %>%
+  bind_cols(query_cdr3_keys(.$light_cdr3_aa) %>% rename(light_full = cdr3_full, light_core = cdr3_core, light_invalid = cdr3_invalid)) %>%
+  filter(!cdr3_invalid, nchar(cdr3_core) >= 8)
+antigen_base <- analysis %>% distinct(sample_id, age_group) %>%
+  left_join(query %>% count(sample_id, name = "n_query"), by = "sample_id") %>%
+  mutate(n_query = replace_na(n_query, 0L), n_hit = NA_integer_, exact_frac = NA_real_)
+reference_check <- read_local_antigen_reference(cov_path)
+iedb_check <- read_iedb_bcr_reference(iedb_path)
+cov_ref <- if (is.null(reference_check$data)) tibble() else {
+  cov <- reference_check$data
+  heavy_parsed <- parse_reference_heavy_v(cov$`Heavy V Gene`)
+  light_parsed <- if ("Light V Gene" %in% names(cov)) parse_reference_heavy_v(cov$`Light V Gene`) else NULL
+  cov %>%
+    transmute(
+      ref_name = as.character(Name),
+      antigen_raw = as.character(`Binds to`),
+      v_gene = heavy_parsed$match_gene,
+      ref_light_v = if (is.null(light_parsed)) NA_character_ else light_parsed$match_gene,
+      ref_light_cdr3 = if ("CDRL3" %in% names(cov)) toupper(trimws(as.character(CDRL3))) else NA_character_,
+      cdr3_ref = toupper(trimws(as.character(CDRH3))),
+      source = "CoV-AbDab 2024-02-08"
+    ) %>%
+    filter(!is.na(v_gene), aa_sequence_ok(cdr3_ref))
 }
-stat_tests[[length(stat_tests) + 1]] <- wilcox_age(
-  igg_plasma_metrics, "gini", "Gini-Simpson, IGHG Plasma", "igg_plasma", min_donors
+ref <- bind_rows(cov_ref, iedb_check$data)
+if (nrow(query) == 0 || nrow(ref) == 0) {
+  antigen_donor <- antigen_base
+  antigen_status <- paste("not computable:", if (nrow(query) == 0) "no eligible queries" else "no eligible reference sequences")
+} else {
+  antigen_status <- "completed"
+  by_core <- query %>% inner_join(ref, by = c("v_gene_use" = "v_gene", "cdr3_core" = "cdr3_ref"), relationship = "many-to-many")
+  antigen_hits <- by_core %>%
+    mutate(
+      evidence = if_else(
+        paired_light & !is.na(ref_light_v) & ref_light_v == light_v &
+          !is.na(ref_light_cdr3) & (ref_light_cdr3 == light_full | ref_light_cdr3 == light_core),
+        "paired heavy and light CDR3",
+        "heavy chain only"
+      ),
+      match_key = "heavy CDR3 without junction anchors; human single V gene"
+    ) %>%
+    distinct(barcode, source, ref_name, .keep_all = TRUE)
+  computed <- query %>%
+    mutate(hit = barcode %in% antigen_hits$barcode) %>%
+    group_by(sample_id, age_group) %>%
+    summarise(n_query = n(), n_hit = n_distinct(barcode[hit]), exact_frac = n_hit / n_query, .groups = "drop")
+  antigen_donor <- antigen_base %>% select(sample_id, age_group, n_query) %>%
+    left_join(computed %>% select(sample_id, n_hit, exact_frac), by = "sample_id")
+}
+antigen_by_db <- ref %>%
+  count(source, name = "n_reference") %>%
+  left_join(
+    if (nrow(antigen_hits)) antigen_hits %>% group_by(source) %>% summarise(n_hit_cells = n_distinct(barcode), .groups = "drop") else
+      tibble(source = character(), n_hit_cells = integer()),
+    by = "source"
+  ) %>%
+  mutate(n_hit_cells = replace_na(n_hit_cells, 0L))
+antigen_qc <- tibble(
+  status = antigen_status,
+  reference_check = paste(reference_check$note, iedb_check$note, sep = " | "),
+  file = paste(cov_path, iedb_path, sep = " | "),
+  n_query = nrow(query),
+  n_hit_cells = if (nrow(antigen_hits)) n_distinct(antigen_hits$barcode) else if (startsWith(antigen_status, "completed")) 0L else NA_integer_,
+  n_exact_public = nrow(exact_public),
+  n_near_pairs = nrow(near_public)
 )
-plasma_b <- analysis %>%
-  filter(cell_subtype == "Plasma") %>%
-  count(sample_id, age_group, name = "n_plasma")
-igg_among <- plasma_b %>%
-  left_join(igg_plasma %>% count(sample_id, name = "n_igg"), by = "sample_id") %>%
-  mutate(n_igg = replace_na(n_igg, 0L), igg_frac = n_igg / n_plasma) %>%
-  filter(n_plasma >= min_subtype_cells)
-stat_tests[[length(stat_tests) + 1]] <- wilcox_age(
-  igg_among, "igg_frac", "IGHG fraction within Plasma", "igg_plasma", min_donors
-)
-p_igg_exp <- plot_age_box(igg_plasma_metrics, "expanded_frac", "Expanded IgG plasma cells (%)", NULL, percent = TRUE)
-igg_tests <- collect_age_tests(stat_tests)
-p_igg_exp <- annotate_age_plot(
-  p_igg_exp, igg_plasma_metrics, "expanded_frac", igg_tests,
-  tibble(family = "igg_plasma", metric = "IGHG Plasma; expanded_frac")
-)
-save_plot(p_igg_exp, "25_igg_plasma_expanded", 1.85, 2.15)
-print(p_igg_exp)
-write_fig_xlsx("25_igg_plasma_expanded", igg_plasma_metrics, statistics_from_plot(p_igg_exp),
-  tibble(field = c("sample_id", "n_bcr", "expanded_frac", "shannon", "gini"),
-    meaning = c("供者", "IgG 浆细胞数", "扩增细胞比例", "Shannon", "Gini-Simpson")),
-  tibble(item = "min_subtype_cells", value = min_subtype_cells))
+write_xlsx(list(qc = antigen_qc, by_reference = antigen_by_db, public_exact = exact_public, public_near = near_public, by_donor = antigen_donor), "public_antigen")
+if (nrow(antigen_hits)) {
+  write_xlsx(antigen_hits %>% select(any_of(c(
+    "barcode", "sample_id", "age_group", "cell_subtype", "v_gene", "c_gene",
+    "cdr3_aa", "clone_size", "mu_percent", "source", "ref_name", "antigen_raw",
+    "evidence", "match_key", "ref_light_v"
+  ))), "antigen_hits")
+}
+antigen_qc
 ```
 
-图 25. 每个点是一位供者。纵轴是 IgG 浆细胞里，属于扩增克隆的细胞占百分之几。同一个供者里，IGHV 相同而且重链 CDR3 氨基酸完全相同、至少有 2 个细胞，才算扩增。只在 IgG 浆细胞内部计算，不把别的浆细胞算进来。年老组中位数大约 7% 到 21%，7 位年轻供者和 8 位年老供者，p = 0.25，两组重叠很大，还不能说扩增更强。
+结论：`r nrow(query)` 条合格重链在两个库里都没有**同一 IGHV 且 CDR3 氨基酸完全相同**的命中，命中细胞 `r antigen_qc$n_hit_cells` 个。这不能推断这些 B 细胞没有抗原特异性。供者之间 IGHV+CDR3 氨基酸完全相同的有 `r nrow(exact_public)` 条；CDR3 仅差一个氨基酸的跨供者配对有 `r nrow(near_public)` 对。
 
 ```{r}
-#| label: igg-plasma-shm
-#| fig-width: 1.85
-#| fig-height: 2.15
-
-p_igg_shm <- plot_age_box(
-  plasma_iso %>% filter(isotype_group == "IGHG"),
-  "median_mu", "V-region mutation (%)", "IgG plasma"
-)
-p_igg_shm <- annotate_age_plot(
-  p_igg_shm, plasma_iso %>% filter(isotype_group == "IGHG"), "median_mu", shm_plot_tests,
-  tibble(family = "shm_plasma_isotype", metric = "Plasma SHM within IGHG")
-)
-save_plot(p_igg_shm, "26_igg_plasma_shm", 1.85, 2.15)
-print(p_igg_shm)
-write_fig_xlsx("26_igg_plasma_shm", p_igg_shm$data, statistics_from_plot(p_igg_shm),
-  tibble(field = c("sample_id", "n_shm", "median_mu"),
-    meaning = c("供者", "有突变率的 IgG 浆细胞数", "供者内突变率中位数")),
-  tibble(item = "min_subtype_cells", value = min_subtype_cells))
+#| label: antigen-summary
+#| echo: false
+antigen_by_db
 ```
-
-图 26. 每个点是一位供者。纵轴是这位供者 IgG 浆细胞的 V 区突变中位数。算法和图 12 里 IgG Memory B 相同：先算每个细胞相对种系 V 区的差异，再取该供者的中位数。图 17 中间的 IgG 一格是同一批数字。两组都在 9% 左右（约 9.0% 对 9.2%，p = 0.40），没有明确差别。
-
-```{r}
-#| label: igg-plasma-diversity
-#| fig-width: 1.85
-#| fig-height: 2.15
-
-p_igg_gini <- plot_age_box(igg_plasma_metrics, "gini", "Gini-Simpson", "IgG plasma")
-p_igg_gini <- annotate_age_plot(
-  p_igg_gini, igg_plasma_metrics, "gini", igg_tests,
-  tibble(family = "igg_plasma", metric = "Gini-Simpson, IGHG Plasma")
-)
-save_plot(p_igg_gini, "27_igg_plasma_gini", 1.85, 2.15)
-print(p_igg_gini)
-write_fig_xlsx("27_igg_plasma_gini", igg_plasma_metrics, statistics_from_plot(p_igg_gini),
-  tibble(field = c("sample_id", "n_bcr", "gini"),
-    meaning = c("供者", "IgG 浆细胞数", "Gini-Simpson，越接近 1 越分散")),
-  tibble(item = "min_subtype_cells", value = min_subtype_cells))
-write_xlsx(list(metrics = igg_plasma_metrics, igg_among_plasma = igg_among), "igg_plasma")
-```
-
-图 27. 每个点是一位供者。纵轴越接近 1，IgG 浆细胞的克隆越分散；越低，说明少数克隆占了更多细胞。采到的 IgG 浆细胞越少，这个数越容易被少数克隆拉动，所以要和细胞数一起看。年老组里低于 0.9 的是 O8，只有 10 个 IgG 浆细胞。两组整体 p = 0.22，没有明确差别。
 
 ```{r}
 #| label: finalize-tests
@@ -1327,45 +1345,44 @@ write_xlsx(list(tests = tests, primary_raw = primary_hits), "age_tests")
 
 ## 主要结论
 
-下表是去掉 O6、O11 之后的供者中位数。比例是占 B 系细胞的百分比，不是绝对细胞数。图上括号是原始 p，表里另有同 family 的参考 BH。原始 p < 0.05 只记为探索性信号。完整比较见 `age_tests.xlsx`。
+下表按 **Memory B** 与 **Plasma** 并列列出组成、扩增、SHM 与多样性指标，并附 **Immature B 比例**（早期组成）与全库扩增对照。数值均为年轻→年老的供者中位数；比例为占 B 系细胞的百分比，不是绝对细胞数。图括号为原始 p；表中另给同 `family` 的参考 BH。原始 p < 0.05 仅作探索性信号。更完整的 182 项比较见 `age_tests.xlsx`。
 
-**浆细胞**  
-占 B 系细胞的比例是本版首先核对的终点（图 05）：供者中位数约 5.55%→23.0%，10 对 9 人，Wilcoxon 原始 p = 0.045，abundance 家族参考 BH = 0.14。这是探索性信号，而且比例变化不是绝对细胞数变化。亚型内扩增约 6.5%→13.3%（9 对 9 人，原始 p = 0.070）。整体 V 区突变约 9.38%→9.73%（原始 p = 0.19）。Gini–Simpson 原始 p = 0.11。扩增、突变和多样性都还不能写成已经显著。
+**Memory B**  
+占 B 系细胞比例 12.44%→21.64%（图 05s，Young/Old n=10/11，原始 p=0.256）——方向与年老组略高一致，但证据不足，宜作待验证线索。亚型内扩增细胞比例 0%→3.45%（图 07，n=9/11，p=0.130）；不足以确认扩增增强。V 区突变 4.51%→5.21%（图 11，原始 p=0.0085，参考 BH=0.026），为本轮优先汇报的探索性信号。IgG 分层 6.39%→7.49%（图 12，各 8 名供者，p=0.029，参考 BH=0.087），宜作验证线索。Gini–Simpson（p=0.879）与 Shannon（p=0.903）未见一致组间差异。
 
-**IgG 浆细胞**  
-图 25 看 IgG 浆细胞内部的扩增：大约 7% 到 21%，p = 0.25，两组重叠很大。图 26 的 V 区突变两组都在 9% 左右，p = 0.40。图 27 看克隆是否分散，p = 0.22；O8 是年老组里最低的一点，只有 10 个 IgG 浆细胞。IgG 占该供者全部浆细胞的比例大约 65% 到 51%，p = 0.074，年老组并没有更高。这几项都还是线索，不能写成 IgG 浆细胞已经扩增或突变更高。
+**Plasma**  
+占 B 系细胞比例 5.55%→19.96%（**图 05** Plasma 分面，n=10/11，p=0.113）——比例变化不能等同绝对细胞数；待更大样本验证。亚型内扩增 6.45%→12.52%（图 07，n=9/10，p=0.202），与记忆 B 类似，中位数略高但重叠大。整体 V 区突变 9.38%→9.67%（图 11，p=0.396）；IgG/IgA 分层亦无明确差异（图 17）。Gini–Simpson 0.954→0.983（图 22，p=0.079）；Shannon（图 14，p=0.112）与 Plasma Top10（p=0.094；**图 13 为全 B 系**，不宜混用）受**回收深度**影响——进入比较的供者中，可定义克隆的浆细胞数中位数年轻约 31、年老约 91。类别转换（switched_frac，p≈0.36）未见稳定差异。
 
-**记忆 B 与早期组成**  
-Memory B 的组成、扩增、SHM 和多样性仍列在表中，供对照。Immature B 比例下降是组成观察。全库扩增没有稳定年龄差异。STARTRAC 不作扩增结论。本版没有做共享克隆或抗原库比对。年轻组 4/10、年老组 9/9 为动脉瘤相关手术供者。
+**组成与其他**  
+Immature B 比例 11.87%→4.29%（Wilcoxon，原始 p≈0.0028，abundance BH≈0.025）为组成观察。Transitional B 9.79%→5.04%（年老偏低；Welch 原始 p≈0.015，abundance BH≈0.069），与图 05 括号及图注一致。全库扩增细胞比例无稳定差异；STARTRAC 不作扩增结论。公共库无 IGHV+CDR3 完全相同命中。
 
 ```{r}
 #| label: result-summary
 summary_specs <- tibble(
   亚型 = c(
-    rep("Plasma", 5), rep("IgG Plasma", 4), rep("Memory B", 4), "早期组成", "全库对照"
+    rep("Memory B", 6), rep("Plasma", 5), "早期组成", "全库对照", "早期组成"
   ),
   family = c(
+    "abundance", "expansion", "shm_cell", "shm_memory_isotype", "diversity", "expansion",
     "abundance", "expansion", "shm_cell", "diversity", "expansion",
-    "igg_plasma", "igg_plasma", "shm_plasma_isotype", "igg_plasma",
-    "abundance", "expansion", "shm_cell", "shm_memory_isotype",
-    "abundance", "expansion"
+    "abundance", "expansion", "abundance"
   ),
   metric = c(
-    "Subtype fraction, Plasma", "Plasma; primary; expanded_frac",
-    "Cell-median SHM, Plasma", "Gini-Simpson, Plasma", "Plasma; primary; shannon",
-    "IGHG fraction within Plasma", "IGHG Plasma; expanded_frac",
-    "Plasma SHM within IGHG", "Gini-Simpson, IGHG Plasma",
     "Subtype fraction, Memory B", "Memory B; primary; expanded_frac",
     "Cell-median SHM, Memory B", "Memory SHM within IGHG",
-    "Subtype fraction, Immature B", "All B-lineage heavy chains; primary; expanded_frac"
+    "Gini-Simpson, Memory B", "Memory B; primary; shannon",
+    "Subtype fraction, Plasma", "Plasma; primary; expanded_frac",
+    "Cell-median SHM, Plasma", "Gini-Simpson, Plasma", "Plasma; primary; shannon",
+    "Subtype fraction, Immature B", "All B-lineage heavy chains; primary; expanded_frac",
+    "Subtype fraction, Transitional B"
   ),
   label = c(
-    "占 B 系细胞比例 (%)", "扩增细胞比例 (%)", "V 区突变 (%)", "Gini–Simpson", "Shannon",
-    "IgG 占浆细胞比例 (%)", "扩增细胞比例 (%)", "V 区突变 (%)", "Gini–Simpson",
     "占 B 系细胞比例 (%)", "扩增细胞比例 (%)", "V 区突变 (%)", "IgG 层 V 区突变 (%)",
-    "Immature B 比例 (%)", "全 B 系扩增比例 (%)"
+    "Gini–Simpson", "Shannon",
+    "占 B 系细胞比例 (%)", "扩增细胞比例 (%)", "V 区突变 (%)", "Gini–Simpson", "Shannon",
+    "Immature B 比例 (%)", "全 B 系扩增比例 (%)", "Transitional B 比例 (%)"
   ),
-  multiplier = c(100, 100, 1, 1, 1, 100, 100, 1, 1, 100, 100, 1, 1, 100, 100)
+  multiplier = c(100, 100, 1, 1, 1, 1, 100, 100, 1, 1, 1, 100, 100, 100)
 )
 summary_table <- summary_specs %>%
   left_join(tests, by = c("family", "metric")) %>%
@@ -1411,7 +1428,7 @@ metadata_fields <- c(
   "clone_id", "clone_id_vj_nt", "clone_id_paired", "clone_size", "subtype_clone_size",
   "isotype_clone_size", "expanded_repertoire", "expanded_within_subtype", "expanded_within_isotype",
   "n_productive_igh", "n_rearrangements", "v_ambiguous", "v_orphon", "paired_light",
-  "mu_percent", "shm_reason"
+  "mu_percent", "shm_reason", "public_exact", "public_near"
 )
 for (field in metadata_fields) {
   values <- analysis[[field]]
@@ -1444,7 +1461,7 @@ write_xlsx(analysis %>% select(
   light_contig_id, light_v, light_j, light_c, light_cdr3_aa,
   clone_id, clone_id_vj_nt, clone_id_paired, clone_size, subtype_clone_size, isotype_clone_size,
   expanded_repertoire, expanded_within_subtype, expanded_within_isotype,
-  mu_percent, v_identity, callable_v_bases, shm_reason
+  mu_percent, v_identity, callable_v_bases, shm_reason, public_exact, public_near
 ), "bcr_cells")
 write_xlsx(top_clones, "top_clones")
 
@@ -1671,8 +1688,7 @@ write_fig_xlsx("02b_umap_shm", umap_panel_data, NULL, umap_dict, params)
 annotated_plot_objects <- list(
   `05` = p_frac, `05s` = p_frac_rest, `06` = p_exp, `07` = p_exp_sub, `07s` = p_exp_rest,
   `09` = p_sw, `10` = p_v, `11` = p_shm, `12` = p_mem, `13` = p_top, `14` = p_shan,
-  `16` = p_iso_exp, `17` = p_plasma, `22` = p_gini, `23` = p_expa, `24` = p_tran,
-  `25` = p_igg_exp, `26` = p_igg_shm, `27` = p_igg_gini
+  `16` = p_iso_exp, `17` = p_plasma, `22` = p_gini, `23` = p_expa, `24` = p_tran
 )
 figure_annotations <- bind_rows(lapply(names(annotated_plot_objects), function(id) {
   statistics_from_plot(annotated_plot_objects[[id]]) %>% mutate(figure_id = id)
@@ -1698,15 +1714,13 @@ write_csv(umap_display_audit, file.path(tab_dir, "umap_display_audit.csv"))
 
 figure_index <- tibble(
   figure_id = c("01", "02", "02b", "02c", "02d", "02e", "03", "04", "05", "05s", "06", "07", "07s",
-    "08", "09", "10", "11", "12", "13", "14", "16", "17", "18", "19", "20", "21", "22", "23", "24",
-    "25", "26", "27"),
+    "08", "09", "10", "11", "12", "13", "14", "16", "17", "18", "19", "20", "21", "22", "23", "24"),
   title = c("Marker 点图", "亚型 UMAP", "UMAP 年龄", "UMAP 克隆大小", "UMAP 同种型", "UMAP 突变",
             "重链回收率", "亚型组成", "重点亚型比例", "其余亚型比例", "全库扩增", "主要亚型内扩增", "其余亚型内扩增",
             "同种型构成", "类别转换", "IGHV 使用率", "主要亚型 SHM", "Memory B 分同种型 SHM",
             "Top 10 克隆占比", "Shannon", "同种型内扩增", "Plasma 分同种型 SHM",
             "供者克隆大小", "年轻年老克隆大小", "亚型克隆大小甜甜圈", "扩增细胞亚型甜甜圈",
-            "Gini-Simpson", "STARTRAC 扩增", "STARTRAC 亚型间共享",
-            "IgG 浆细胞扩增", "IgG 浆细胞 SHM", "IgG 浆细胞 Gini"),
+            "Gini-Simpson", "STARTRAC 扩增", "STARTRAC 亚型间共享"),
   workbook = paste0("fig_", c(
     "01_markers", "02_umap", "02b_umap_age", "02b_umap_clone", "02b_umap_isotype", "02b_umap_shm",
     "03_recovery", "04_composition", "05_subtype_fraction", "05s_subtype_fraction",
@@ -1714,8 +1728,7 @@ figure_index <- tibble(
     "10_ighv", "11_shm_main", "12_memory_shm", "13_top10", "14_shannon",
     "16_within_isotype", "17_plasma_shm", "18_clone_size_by_donor", "19_clone_homeostasis",
     "20_clone_size_donuts", "21_expanded_subtype_donuts", "22_gini",
-    "23_startrac_expansion", "23_startrac_transition",
-    "25_igg_plasma_expanded", "26_igg_plasma_shm", "27_igg_plasma_gini"), ".xlsx"),
+    "23_startrac_expansion", "23_startrac_transition"), ".xlsx"),
   unit = "见 dictionary sheet"
 )
 figure_stem <- c(
@@ -1725,8 +1738,7 @@ figure_stem <- c(
   "08_isotype_by_subtype", "09_switched_by_main_subtype", "10_ighv_usage", "11_shm_main_subtypes",
   "12_shm_memory_by_isotype", "13_top10_fraction", "14_shannon_main_subtypes", "16_expansion_within_isotype",
   "17_shm_plasma_by_isotype", "18_clone_size_by_donor", "19_clone_homeostasis", "20_clone_size_donuts",
-  "21_expanded_subtype_donuts", "22_gini_simpson", "23_startrac_expansion", "23_startrac_transition",
-  "25_igg_plasma_expanded", "26_igg_plasma_shm", "27_igg_plasma_gini"
+  "21_expanded_subtype_donuts", "22_gini_simpson", "23_startrac_expansion", "23_startrac_transition"
 )
 stopifnot(length(figure_stem) == nrow(figure_index))
 figure_index <- figure_index %>%

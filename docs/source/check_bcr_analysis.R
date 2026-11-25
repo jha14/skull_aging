@@ -107,27 +107,28 @@ check("no test exceeds the available donor count",
   all(tests$n_young <= sum(si$age_group == "Young")) && all(tests$n_old <= sum(si$age_group == "Old")))
 top <- openxlsx::read.xlsx("results/bcr/tables/top_clones.xlsx")
 check("top-clone table contains one row per donor and clone", !anyDuplicated(top[c("sample_id", "clone_id")]))
+qc <- openxlsx::read.xlsx("results/bcr/tables/public_antigen.xlsx", sheet = "qc")
 check("truncated CoV-AbDab copy remains unusable",
   is.null(read_local_antigen_reference("data/reference/provenance/CoV-AbDab_080224.truncated.csv")$data))
-check("excluded donors are absent from the analysed cells",
-  !any(a$sample_id %in% c("LXY_SkullBM_240412", "ZFR_SkullBM_240315")))
+if (grepl("^not computable", qc$status)) {
+  check("unusable antigen reference produces no hit count", is.na(qc$n_hit_cells))
+}
+if (grepl("^completed", qc$status)) {
+  check("completed antigen search records a hit count", !is.na(qc$n_hit_cells) && qc$n_hit_cells >= 0)
+}
 obj <- readRDS("results/bcr/rdata/b_lineage_with_bcr.rds")
 idx <- match(a$barcode, colnames(obj))
 check("every analysed cell is present in the saved Seurat object", !anyNA(idx))
 for (field in c("contig_id", "isotype", "isotype_group", "switched", "clone_id", "clone_size",
-                "subtype_clone_size", "isotype_clone_size", "mu_percent")) {
+                "subtype_clone_size", "isotype_clone_size", "mu_percent", "public_exact", "public_near")) {
   check(paste("saved Seurat metadata agrees:", field), same(a[[field]], obj@meta.data[[field]][idx]))
 }
 check("the SHM caches were preserved", all(file.exists(file.path("results/bcr/shm", si$sample_id, "shm_result_db-pass.tsv"))))
 bins <- openxlsx::read.xlsx("results/bcr/tables/clone_size_bins.xlsx", sheet = "by_donor")
 bin_sum <- tapply(bins$pct, bins$sample_id, sum)
 check("every donor clone-size bar sums to 100", all(abs(bin_sum - 100) < 1e-6))
-if ("WLR220308_Z" %in% bins$sample_id) {
-  wlr <- bins[bins$sample_id == "WLR220308_Z" & bins$clone_bin == "= 1", ]
-  check("WLR220308_Z keeps the clone-size 1 segment", nrow(wlr) == 1 && wlr$pct > 60)
-} else {
-  check("WLR220308_Z is excluded from this cohort", TRUE)
-}
+wlr <- bins[bins$sample_id == "WLR220308_Z" & bins$clone_bin == "= 1", ]
+check("WLR220308_Z keeps the clone-size 1 segment", nrow(wlr) == 1 && wlr$pct > 60)
 label_numbers <- function(x) as.integer(sub("^[YO]", "", unique(x)))
 check("donor labels follow numeric order",
   !is.unsorted(label_numbers(bins$donor_label[bins$age_group == "Young"])) &&
@@ -157,7 +158,7 @@ ann <- readr::read_csv("results/bcr/tables/figure_stat_annotations.csv",
 ann_idx <- match(ann$test_id, tests$test_id)
 check("all comparative figures have traceable test annotations",
   !anyNA(ann_idx) && !anyDuplicated(ann[c("figure_id", "test_id")]) &&
-    setequal(unique(ann$figure_id), c("05", "05s", "06", "07", "07s", "09", "10", "11", "12", "13", "14", "16", "17", "22", "23", "24", "25", "26", "27")))
+    setequal(unique(ann$figure_id), c("05", "05s", "06", "07", "07s", "09", "10", "11", "12", "13", "14", "16", "17", "22", "23", "24")))
 tested <- !is.na(tests$p_value)
 check("age tests record the chosen test method",
   all(tests$test_method[tested] %in% c("Welch t-test", "Wilcoxon")))

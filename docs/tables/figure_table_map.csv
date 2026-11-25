@@ -28,6 +28,3 @@ figure_id,title,workbook,unit,pdf,png
 22,Gini-Simpson,fig_22_gini.xlsx,见 dictionary sheet,22_gini_simpson.pdf,22_gini_simpson.png
 23,STARTRAC 扩增,fig_23_startrac_expansion.xlsx,见 dictionary sheet,23_startrac_expansion.pdf,23_startrac_expansion.png
 24,STARTRAC 亚型间共享,fig_23_startrac_transition.xlsx,见 dictionary sheet,23_startrac_transition.pdf,23_startrac_transition.png
-25,IgG 浆细胞扩增,fig_25_igg_plasma_expanded.xlsx,见 dictionary sheet,25_igg_plasma_expanded.pdf,25_igg_plasma_expanded.png
-26,IgG 浆细胞 SHM,fig_26_igg_plasma_shm.xlsx,见 dictionary sheet,26_igg_plasma_shm.pdf,26_igg_plasma_shm.png
-27,IgG 浆细胞 Gini,fig_27_igg_plasma_gini.xlsx,见 dictionary sheet,27_igg_plasma_gini.pdf,27_igg_plasma_gini.png

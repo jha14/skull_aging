@@ -55,11 +55,15 @@ check("reference terminal C/W residues are retained", read_local_antigen_referen
 writeLines(c('Name,Binds to,Heavy V Gene,CDRH3', 'test,target,IGHV1-2,"CQQQQQQW'), ref_file)
 check("truncated reference is unavailable, not a zero-hit reference", is.null(read_local_antigen_reference(ref_file)$data))
 unlink(ref_file)
-if ("--unit-only" %in% commandArgs(trailingOnly = TRUE)) {
+args <- commandArgs(trailingOnly = TRUE)
+if ("--unit-only" %in% args) {
   print(bind_rows(checks)); quit(status = 0)
 }
+positional <- args[!startsWith(args, "--")]
+results_dir <- if (length(positional)) positional[[1]] else "results/bcr"
+shm_dir <- if (dir.exists(file.path(results_dir, "shm"))) file.path(results_dir, "shm") else "results/bcr/shm"
 
-a <- readRDS("results/bcr/rdata/bcr_cells.rds")
+a <- readRDS(file.path(results_dir, "rdata/bcr_cells.rds"))
 si <- readr::read_csv("codes/sample_info.csv", show_col_types = FALSE)
 check("one row per analysed cell", !anyDuplicated(a$barcode))
 check("Non-B cells are excluded before clone counting", all(a$lineage != "Non-B"))
@@ -101,25 +105,25 @@ even <- startrac_indices(c("a", "b", "c", "d"), rep("Naive B", 4))
 single <- startrac_indices(rep("a", 6), rep("Plasma", 6))
 check("STARTRAC expansion is zero for equal clones and undefined for one clone",
   abs(even$expa) < 1e-12 && even$tran == 0 && is.na(single$expa) && single$tran == 0)
-tests <- openxlsx::read.xlsx("results/bcr/tables/age_tests.xlsx", sheet = "tests")
+tests <- openxlsx::read.xlsx(file.path(results_dir, "tables/age_tests.xlsx"), sheet = "tests")
 check("sampling-depth tests are not part of the delivered comparison", !any(tests$family == "rarefaction"))
 check("no test exceeds the available donor count",
   all(tests$n_young <= sum(si$age_group == "Young")) && all(tests$n_old <= sum(si$age_group == "Old")))
-top <- openxlsx::read.xlsx("results/bcr/tables/top_clones.xlsx")
+top <- openxlsx::read.xlsx(file.path(results_dir, "tables/top_clones.xlsx"))
 check("top-clone table contains one row per donor and clone", !anyDuplicated(top[c("sample_id", "clone_id")]))
 check("truncated CoV-AbDab copy remains unusable",
   is.null(read_local_antigen_reference("data/reference/provenance/CoV-AbDab_080224.truncated.csv")$data))
 check("excluded donors are absent from the analysed cells",
   !any(a$sample_id %in% c("LXY_SkullBM_240412", "ZFR_SkullBM_240315")))
-obj <- readRDS("results/bcr/rdata/b_lineage_with_bcr.rds")
+obj <- readRDS(file.path(results_dir, "rdata/b_lineage_with_bcr.rds"))
 idx <- match(a$barcode, colnames(obj))
 check("every analysed cell is present in the saved Seurat object", !anyNA(idx))
 for (field in c("contig_id", "isotype", "isotype_group", "switched", "clone_id", "clone_size",
                 "subtype_clone_size", "isotype_clone_size", "mu_percent")) {
   check(paste("saved Seurat metadata agrees:", field), same(a[[field]], obj@meta.data[[field]][idx]))
 }
-check("the SHM caches were preserved", all(file.exists(file.path("results/bcr/shm", si$sample_id, "shm_result_db-pass.tsv"))))
-bins <- openxlsx::read.xlsx("results/bcr/tables/clone_size_bins.xlsx", sheet = "by_donor")
+check("the SHM caches were preserved", all(file.exists(file.path(shm_dir, si$sample_id, "shm_result_db-pass.tsv"))))
+bins <- openxlsx::read.xlsx(file.path(results_dir, "tables/clone_size_bins.xlsx"), sheet = "by_donor")
 bin_sum <- tapply(bins$pct, bins$sample_id, sum)
 check("every donor clone-size bar sums to 100", all(abs(bin_sum - 100) < 1e-6))
 if ("WLR220308_Z" %in% bins$sample_id) {
@@ -132,13 +136,13 @@ label_numbers <- function(x) as.integer(sub("^[YO]", "", unique(x)))
 check("donor labels follow numeric order",
   !is.unsorted(label_numbers(bins$donor_label[bins$age_group == "Young"])) &&
     !is.unsorted(label_numbers(bins$donor_label[bins$age_group == "Old"])))
-rec <- openxlsx::read.xlsx("results/bcr/tables/fig_03_recovery.xlsx", sheet = "plot_data")
-comp <- openxlsx::read.xlsx("results/bcr/tables/fig_04_composition.xlsx", sheet = "plot_data")
+rec <- openxlsx::read.xlsx(file.path(results_dir, "tables/fig_03_recovery.xlsx"), sheet = "plot_data")
+comp <- openxlsx::read.xlsx(file.path(results_dir, "tables/fig_04_composition.xlsx"), sheet = "plot_data")
 check("recovery and composition tables keep donor labels",
   "donor_label" %in% names(rec) && "donor_label" %in% names(comp))
 
 # Check the exported graphics against independent cell coordinates and the final tests.
-umap_data <- openxlsx::read.xlsx("results/bcr/tables/fig_02_umap.xlsx", sheet = "plot_data")
+umap_data <- openxlsx::read.xlsx(file.path(results_dir, "tables/fig_02_umap.xlsx"), sheet = "plot_data")
 coordinates <- obj[["umap"]]@cell.embeddings
 coord_idx <- match(umap_data$barcode, rownames(coordinates))
 check("UMAP export contains each cell exactly once",
@@ -146,13 +150,13 @@ check("UMAP export contains each cell exactly once",
 check("UMAP coordinates agree with the saved embedding",
   isTRUE(all.equal(as.matrix(umap_data[c("UMAP_1", "UMAP_2")]),
     unname(coordinates[coord_idx, 1:2]), check.attributes = FALSE, tolerance = 1e-12)))
-display <- readr::read_csv("results/bcr/tables/umap_display_audit.csv", show_col_types = FALSE)
+display <- readr::read_csv(file.path(results_dir, "tables/umap_display_audit.csv"), show_col_types = FALSE)
 check("all five UMAP panels use square coordinate ranges",
   nrow(display) == 5 && all(abs((display$x_max - display$x_min) - (display$y_max - display$y_min)) < 1e-10) &&
     all(display$coordinate_ratio == 1))
 check("UMAP panels share limits and keep circular points",
   nrow(unique(display[c("x_min", "x_max", "y_min", "y_max")])) == 1 && all(display$point_shape == 19))
-ann <- readr::read_csv("results/bcr/tables/figure_stat_annotations.csv",
+ann <- readr::read_csv(file.path(results_dir, "tables/figure_stat_annotations.csv"),
   col_types = readr::cols(.default = readr::col_guess(), figure_id = readr::col_character()))
 ann_idx <- match(ann$test_id, tests$test_id)
 check("all comparative figures have traceable test annotations",
@@ -167,19 +171,19 @@ for (field in c("p_value", "n_young", "n_old")) {
 }
 check("all nine subtype proportions have age tests",
   sum(ann$figure_id %in% c("05", "05s")) == 9 && all(!is.na(ann$p_value[ann$figure_id %in% c("05", "05s")])))
-figure_map <- openxlsx::read.xlsx("results/bcr/tables/figure_table_map.xlsx")
+figure_map <- openxlsx::read.xlsx(file.path(results_dir, "tables/figure_table_map.xlsx"))
 figure_map$figure_id <- as.character(figure_map$figure_id)
 for (id in unique(ann$figure_id)) {
   file <- figure_map$workbook[match(id, figure_map$figure_id)]
-  figure_stats <- openxlsx::read.xlsx(file.path("results/bcr/tables", file), sheet = "statistics")
+  figure_stats <- openxlsx::read.xlsx(file.path(results_dir, "tables", file), sheet = "statistics")
   check(paste("figure workbook contains its displayed tests:", id),
     setequal(figure_stats$test_id, ann$test_id[ann$figure_id == id]))
 }
 out <- bind_rows(checks)
-readr::write_csv(out, "results/bcr/tables/validation_checks.csv")
-paths <- list.files("results/bcr", full.names = TRUE, recursive = TRUE)
+readr::write_csv(out, file.path(results_dir, "tables/validation_checks.csv"))
+paths <- list.files(results_dir, full.names = TRUE, recursive = TRUE)
 paths <- paths[basename(paths) != "file_manifest.xlsx"]
 openxlsx::write.xlsx(data.frame(path = normalizePath(paths), bytes = file.info(paths)$size),
-  "results/bcr/tables/file_manifest.xlsx", overwrite = TRUE)
+  file.path(results_dir, "tables/file_manifest.xlsx"), overwrite = TRUE)
 cat("All", nrow(out), "checks passed.\n")
 cat("Cells:", nrow(a), "; IgD:", sum(a$c_gene == "IGHD", na.rm = TRUE), "; SHM:", sum(!is.na(a$mu_percent)), "\n")

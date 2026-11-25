@@ -1,0 +1,86 @@
+check,passed
+one IgM plus one IgG is not within-isotype expansion,TRUE
+shared sequence retains all donor endpoints,TRUE
+"complete V names, including orphons, are preserved",TRUE
+multiple V calls are not single genes,TRUE
+multi-gene reference V is not collapsed to the first call,TRUE
+human and mouse receptor labels stay distinct,TRUE
+legal extra V-gene numbering is preserved,TRUE
+unknown constant gene remains unknown,TRUE
+D gene cannot change the selected constant gene,TRUE
+paired amino-acid key does not split synonymous heavy junctions,TRUE
+repeated donor rows cannot enter an age test,TRUE
+unobserved V gene contributes a real zero,TRUE
+distinct cross-donor sequence endpoints are not collapsed,TRUE
+invalid amino acids are not deleted to manufacture a match,TRUE
+unsupported junction boundaries do not become canonical CDR3,TRUE
+reference terminal C/W residues are retained,TRUE
+"truncated reference is unavailable, not a zero-hit reference",TRUE
+one row per analysed cell,TRUE
+Non-B cells are excluded before clone counting,TRUE
+every selected heavy chain is present in raw annotations,TRUE
+raw contig agrees: sample_id,TRUE
+raw contig agrees: contig_id,TRUE
+raw contig agrees: v_gene,TRUE
+raw contig agrees: d_gene,TRUE
+raw contig agrees: j_gene,TRUE
+raw contig agrees: c_gene,TRUE
+raw contig agrees: cdr3_nt,TRUE
+heavy-chain amino acid sequence agrees with raw contig,TRUE
+isotype group agrees with raw constant gene,TRUE
+clone sizes use exactly the retained B-lineage cells,TRUE
+subtype clone sizes use the correct scope,TRUE
+isotype clone sizes use the correct scope,TRUE
+global expansion flags agree with retained clone sizes,TRUE
+isotype expansion flags agree with isotype clone sizes,TRUE
+Gini-Simpson is zero for one clone and one half for two equal clones,TRUE
+STARTRAC expansion is zero for equal clones and undefined for one clone,TRUE
+sampling-depth tests are not part of the delivered comparison,TRUE
+no test exceeds the available donor count,TRUE
+top-clone table contains one row per donor and clone,TRUE
+truncated CoV-AbDab copy remains unusable,TRUE
+excluded donors are absent from the analysed cells,TRUE
+every analysed cell is present in the saved Seurat object,TRUE
+saved Seurat metadata agrees: contig_id,TRUE
+saved Seurat metadata agrees: isotype,TRUE
+saved Seurat metadata agrees: isotype_group,TRUE
+saved Seurat metadata agrees: switched,TRUE
+saved Seurat metadata agrees: clone_id,TRUE
+saved Seurat metadata agrees: clone_size,TRUE
+saved Seurat metadata agrees: subtype_clone_size,TRUE
+saved Seurat metadata agrees: isotype_clone_size,TRUE
+saved Seurat metadata agrees: mu_percent,TRUE
+the SHM caches were preserved,TRUE
+every donor clone-size bar sums to 100,TRUE
+WLR220308_Z is excluded from this cohort,TRUE
+donor labels follow numeric order,TRUE
+recovery and composition tables keep donor labels,TRUE
+UMAP export contains each cell exactly once,TRUE
+UMAP coordinates agree with the saved embedding,TRUE
+all five UMAP panels use square coordinate ranges,TRUE
+UMAP panels share limits and keep circular points,TRUE
+all comparative figures have traceable test annotations,TRUE
+age tests record the chosen test method,TRUE
+figure annotations agree with final tests: p_value,TRUE
+figure annotations agree with final tests: n_young,TRUE
+figure annotations agree with final tests: n_old,TRUE
+all nine subtype proportions have age tests,TRUE
+figure workbook contains its displayed tests: 05,TRUE
+figure workbook contains its displayed tests: 05s,TRUE
+figure workbook contains its displayed tests: 06,TRUE
+figure workbook contains its displayed tests: 07,TRUE
+figure workbook contains its displayed tests: 07s,TRUE
+figure workbook contains its displayed tests: 09,TRUE
+figure workbook contains its displayed tests: 10,TRUE
+figure workbook contains its displayed tests: 11,TRUE
+figure workbook contains its displayed tests: 12,TRUE
+figure workbook contains its displayed tests: 13,TRUE
+figure workbook contains its displayed tests: 14,TRUE
+figure workbook contains its displayed tests: 16,TRUE
+figure workbook contains its displayed tests: 17,TRUE
+figure workbook contains its displayed tests: 22,TRUE
+figure workbook contains its displayed tests: 23,TRUE
+figure workbook contains its displayed tests: 24,TRUE
+figure workbook contains its displayed tests: 25,TRUE
+figure workbook contains its displayed tests: 26,TRUE
+figure workbook contains its displayed tests: 27,TRUE

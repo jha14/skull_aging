@@ -1323,6 +1323,106 @@ write_xlsx(list(metrics = igg_plasma_metrics, igg_among_plasma = igg_among), "ig
 
 图 27. 每个点是一位供者。纵轴越接近 1，IgG 浆细胞的克隆越分散；越低，说明少数克隆占了更多细胞。采到的 IgG 浆细胞越少，这个数越容易被少数克隆拉动，所以要和细胞数一起看。年老组里低于 0.9 的是 O8，只有 10 个 IgG 浆细胞。两组整体 p = 0.22，没有明确差别。
 
+
+```{r}
+#| label: igg-plasma-top10
+#| fig-width: 1.85
+#| fig-height: 2.15
+
+if (!exists("pct1")) pct1 <- function(x) sprintf("%.2f%%", 100 * x)
+if (!exists("p3")) p3 <- function(x) sprintf("%.3f", x)
+if (!exists("test_row")) {
+  test_row <- function(metric) {
+    hit <- collect_age_tests(stat_tests)
+    hit <- hit[hit$metric == metric, , drop = FALSE]
+    if (!nrow(hit)) stop("Missing test: ", metric)
+    hit[nrow(hit), ]
+  }
+}
+igg_top_cells <- analysis %>%
+  filter(cell_subtype == "Plasma", isotype_group == "IGHG", !is.na(clone_id))
+igg_top <- donor_clone_metrics(igg_top_cells, "clone_id") %>%
+  filter(n_bcr >= min_subtype_cells)
+stat_tests[[length(stat_tests) + 1]] <- wilcox_age(
+  igg_top, "top10_frac", "IGHG Plasma; top10_frac", "igg_plasma", min_donors
+)
+p_igg_top <- plot_age_box(igg_top, "top10_frac", "Top 10 IgG plasma clones (%)", NULL, percent = TRUE)
+p_igg_top <- annotate_age_plot(
+  p_igg_top, igg_top, "top10_frac", collect_age_tests(stat_tests),
+  tibble(family = "igg_plasma", metric = "IGHG Plasma; top10_frac")
+)
+save_plot(p_igg_top, "28_igg_plasma_top10", 1.85, 2.15)
+print(p_igg_top)
+write_fig_xlsx("28_igg_plasma_top10", igg_top, statistics_from_plot(p_igg_top),
+  tibble(field = c("sample_id", "age_group", "n_bcr", "top10_frac"),
+    meaning = c("供者", "年龄组", "IgG 浆细胞数", "最大 10 个克隆占这些细胞的比例")),
+  tibble(item = "min_subtype_cells", value = min_subtype_cells))
+```
+
+图 28. 每个点是一位供者。这里只看 IgG 浆细胞。纵轴是该供者最大的 10 个克隆占这些细胞的百分比。百分比高，表示少数克隆占了较多细胞。年轻组中位数是 `r pct1(test_row("IGHG Plasma; top10_frac")$median_young)`，年老组是 `r pct1(test_row("IGHG Plasma; top10_frac")$median_old)`（p = `r p3(test_row("IGHG Plasma; top10_frac")$p_value)`）。这不是图 13 的全库结果。
+
+```{r}
+#| label: igg-plasma-vgene
+#| fig-width: 7.2
+#| fig-height: 5.2
+
+igg_v_cells <- analysis %>%
+  filter(cell_subtype == "Plasma", isotype_group == "IGHG", !v_ambiguous, sample_id %in% library_donors)
+igg_v_donors <- igg_v_cells %>%
+  count(sample_id, name = "n_bcr") %>%
+  filter(n_bcr >= min_subtype_cells) %>%
+  pull(sample_id)
+igg_v_cell <- v_usage_grid(igg_v_cells, igg_v_donors, weight = "cell") %>%
+  left_join(sample_info %>% select(sample_id, age_group), by = "sample_id")
+igg_v_mean <- igg_v_cell %>%
+  group_by(v_gene) %>%
+  summarise(mean_pct = mean(pct), .groups = "drop") %>%
+  arrange(desc(mean_pct))
+igg_v_genes <- head(igg_v_mean %>% filter(mean_pct >= 1) %>% pull(v_gene), 15)
+for (gene in igg_v_genes) {
+  stat_tests[[length(stat_tests) + 1]] <- wilcox_age(
+    igg_v_cell %>% filter(v_gene == gene), "pct",
+    paste0("Cell-weighted IGHV within IgG Plasma, ", gene),
+    "igg_plasma_v", min_donors
+  )
+}
+p_igg_v <- igg_v_cell %>%
+  filter(v_gene %in% igg_v_genes) %>%
+  mutate(v_gene = factor(v_gene, levels = rev(igg_v_genes))) %>%
+  ggplot(aes(v_gene, pct, fill = age_group)) +
+  geom_boxplot(outlier.shape = NA, width = 0.7, position = position_dodge(0.8)) +
+  geom_point(position = position_jitterdodge(jitter.width = 0.1, dodge.width = 0.8), size = 1, alpha = 0.75) +
+  scale_fill_manual(values = age_col) +
+  coord_flip() + theme_bcr(8) +
+  labs(x = NULL, y = "IgG plasma cells (%)", title = "IGHV in IgG plasma")
+igg_v_annotation <- tibble(
+  v_gene = factor(igg_v_genes, levels = rev(igg_v_genes)),
+  family = "igg_plasma_v",
+  metric = paste0("Cell-weighted IGHV within IgG Plasma, ", igg_v_genes)
+) %>%
+  left_join(collect_age_tests(stat_tests), by = c("family", "metric"))
+stopifnot(!anyNA(igg_v_annotation$test_id))
+igg_v_annotation$annotation_label <- format_exact_p(igg_v_annotation$p_value)
+igg_vmax <- max(igg_v_cell$pct[igg_v_cell$v_gene %in% igg_v_genes])
+igg_v_annotation$annotation_y <- igg_vmax * 1.06
+p_igg_v <- p_igg_v + geom_text(
+  data = igg_v_annotation, aes(x = v_gene, y = annotation_y, label = annotation_label),
+  inherit.aes = FALSE, hjust = 0, size = 2.1, family = bcr_font_family, lineheight = 1
+) +
+  scale_y_continuous(limits = c(0, igg_vmax * 1.42), expand = expansion(mult = c(.01, .02)))
+attr(p_igg_v, "bcr_stat_annotations") <- igg_v_annotation
+save_plot(p_igg_v, "29_igg_plasma_ighv", 7.2, 5.2)
+print(p_igg_v)
+write_fig_xlsx("29_igg_plasma_ighv", igg_v_cell %>% filter(v_gene %in% igg_v_genes),
+  statistics_from_plot(p_igg_v),
+  tibble(field = c("sample_id", "age_group", "v_gene", "n", "n_total", "pct"),
+    meaning = c("供者", "年龄组", "IGHV 基因", "该基因的 IgG 浆细胞数", "该供者 IgG 浆细胞数", "使用百分比")),
+  tibble(item = "min_subtype_cells", value = min_subtype_cells))
+write_xlsx(list(cell_weighted = igg_v_cell), "igg_plasma_v")
+```
+
+图 29. 每个点是一位供者，只统计 IgG 浆细胞。横轴是该 V 基因占这位供者 IgG 浆细胞的百分比。图上是平均使用率至少 1%、并且最高的 15 个基因。括号是年轻组和年老组这一个基因的原始 p。它和图 10 的全库 V 基因使用不是同一张图。
+
 ```{r}
 #| label: finalize-tests
 #| include: false
@@ -1685,7 +1785,8 @@ annotated_plot_objects <- list(
   `05` = p_frac, `05s` = p_frac_rest, `06` = p_exp, `07` = p_exp_sub, `07s` = p_exp_rest,
   `09` = p_sw, `10` = p_v, `11` = p_shm, `12` = p_mem, `13` = p_top, `14` = p_shan,
   `16` = p_iso_exp, `17` = p_plasma, `22` = p_gini, `23` = p_expa, `24` = p_tran,
-  `25` = p_igg_exp, `26` = p_igg_shm, `27` = p_igg_gini
+  `25` = p_igg_exp, `26` = p_igg_shm, `27` = p_igg_gini,
+  `28` = p_igg_top, `29` = p_igg_v
 )
 figure_annotations <- bind_rows(lapply(names(annotated_plot_objects), function(id) {
   statistics_from_plot(annotated_plot_objects[[id]]) %>% mutate(figure_id = id)
@@ -1712,14 +1813,15 @@ write_csv(umap_display_audit, file.path(tab_dir, "umap_display_audit.csv"))
 figure_index <- tibble(
   figure_id = c("01", "02", "02b", "02c", "02d", "02e", "03", "04", "05", "05s", "06", "07", "07s",
     "08", "09", "10", "11", "12", "13", "14", "16", "17", "18", "19", "20", "21", "22", "23", "24",
-    "25", "26", "27"),
+    "25", "26", "27", "28", "29"),
   title = c("Marker 点图", "亚型 UMAP", "UMAP 年龄", "UMAP 克隆大小", "UMAP 同种型", "UMAP 突变",
             "重链回收率", "亚型组成", "重点亚型比例", "其余亚型比例", "全库扩增", "主要亚型内扩增", "其余亚型内扩增",
             "同种型构成", "类别转换", "IGHV 使用率", "主要亚型 SHM", "Memory B 分同种型 SHM",
             "Top 10 克隆占比", "Shannon", "同种型内扩增", "Plasma 分同种型 SHM",
             "供者克隆大小", "年轻年老克隆大小", "亚型克隆大小甜甜圈", "扩增细胞亚型甜甜圈",
             "Gini-Simpson", "STARTRAC 扩增", "STARTRAC 亚型间共享",
-            "IgG 浆细胞扩增", "IgG 浆细胞 SHM", "IgG 浆细胞 Gini"),
+            "IgG 浆细胞扩增", "IgG 浆细胞 SHM", "IgG 浆细胞 Gini",
+            "IgG 浆细胞 Top 10", "IgG 浆细胞 IGHV"),
   workbook = paste0("fig_", c(
     "01_markers", "02_umap", "02b_umap_age", "02b_umap_clone", "02b_umap_isotype", "02b_umap_shm",
     "03_recovery", "04_composition", "05_subtype_fraction", "05s_subtype_fraction",
@@ -1728,7 +1830,8 @@ figure_index <- tibble(
     "16_within_isotype", "17_plasma_shm", "18_clone_size_by_donor", "19_clone_homeostasis",
     "20_clone_size_donuts", "21_expanded_subtype_donuts", "22_gini",
     "23_startrac_expansion", "23_startrac_transition",
-    "25_igg_plasma_expanded", "26_igg_plasma_shm", "27_igg_plasma_gini"), ".xlsx"),
+    "25_igg_plasma_expanded", "26_igg_plasma_shm", "27_igg_plasma_gini",
+    "28_igg_plasma_top10", "29_igg_plasma_ighv"), ".xlsx"),
   unit = "见 dictionary sheet"
 )
 figure_stem <- c(
@@ -1739,7 +1842,8 @@ figure_stem <- c(
   "12_shm_memory_by_isotype", "13_top10_fraction", "14_shannon_main_subtypes", "16_expansion_within_isotype",
   "17_shm_plasma_by_isotype", "18_clone_size_by_donor", "19_clone_homeostasis", "20_clone_size_donuts",
   "21_expanded_subtype_donuts", "22_gini_simpson", "23_startrac_expansion", "23_startrac_transition",
-  "25_igg_plasma_expanded", "26_igg_plasma_shm", "27_igg_plasma_gini"
+  "25_igg_plasma_expanded", "26_igg_plasma_shm", "27_igg_plasma_gini",
+  "28_igg_plasma_top10", "29_igg_plasma_ighv"
 )
 stopifnot(length(figure_stem) == nrow(figure_index))
 figure_index <- figure_index %>%

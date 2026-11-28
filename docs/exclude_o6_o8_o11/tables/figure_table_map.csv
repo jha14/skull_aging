@@ -31,3 +31,5 @@ figure_id,title,workbook,unit,pdf,png
 25,IgG 浆细胞扩增,fig_25_igg_plasma_expanded.xlsx,见 dictionary sheet,25_igg_plasma_expanded.pdf,25_igg_plasma_expanded.png
 26,IgG 浆细胞 SHM,fig_26_igg_plasma_shm.xlsx,见 dictionary sheet,26_igg_plasma_shm.pdf,26_igg_plasma_shm.png
 27,IgG 浆细胞 Gini,fig_27_igg_plasma_gini.xlsx,见 dictionary sheet,27_igg_plasma_gini.pdf,27_igg_plasma_gini.png
+28,IgG 浆细胞 Top 10,fig_28_igg_plasma_top10.xlsx,见 dictionary sheet,28_igg_plasma_top10.pdf,28_igg_plasma_top10.png
+29,IgG 浆细胞 IGHV,fig_29_igg_plasma_ighv.xlsx,见 dictionary sheet,29_igg_plasma_ighv.pdf,29_igg_plasma_ighv.png

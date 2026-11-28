@@ -9,6 +9,7 @@ import hashlib
 import os
 import re
 import shutil
+import sys
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -47,11 +48,10 @@ DOWNLOAD_BANNER = """<div class="bcr-download-banner" style="background:#e8f4fc;
 """
 
 
-def sync_pages_docs(archive: Path, report: str) -> Path:
-    docs = ROOT / "docs"
+def sync_pages_docs(archive: Path, report: str, docs: Path) -> Path:
     if docs.exists():
         shutil.rmtree(docs)
-    docs.mkdir()
+    docs.mkdir(parents=True)
     with ZipFile(archive) as zf:
         for name in zf.namelist():
             if name.endswith("/") or name == "bcr_skull_bm.html":
@@ -63,8 +63,8 @@ def sync_pages_docs(archive: Path, report: str) -> Path:
     return docs
 
 
-def build():
-    report = (ROOT / "codes" / "bcr_skull_bm.html").read_text()
+def build(report_html, results, pages_dir, zip_path, source_qmd, link_replacements, exclusion_note):
+    report = Path(report_html).read_text()
     audit = ReportAudit()
     audit.feed(report)
     if audit.output_problems:
@@ -76,20 +76,22 @@ def build():
         raise ValueError(f"Expected distinct report figures, found {len(audit.plots)}")
 
     # Rewrite only the exported report; the project HTML keeps its project links.
-    report = report.replace("../results/bcr/tables/", "tables/")
-    report = report.replace("../results/bcr/figures/", "figures/")
+    for old, new in link_replacements:
+        report = report.replace(old, new)
     packaged = ReportAudit()
     packaged.feed(report)
     files = {}
-    with (RESULTS / "tables" / "figure_table_map.csv").open(newline="") as handle:
+    with (results / "tables" / "figure_table_map.csv").open(newline="") as handle:
         for row in csv.DictReader(handle):
-            files[f"tables/{row['workbook']}"] = RESULTS / "tables" / row["workbook"]
-            files[f"figures/{row['pdf']}"] = RESULTS / "figures" / row["pdf"]
-            files[f"figures/{row['png']}"] = RESULTS / "figures" / row["png"]
-    files["tables/figure_table_map.xlsx"] = RESULTS / "tables" / "figure_table_map.xlsx"
-    files["tables/study_design.xlsx"] = RESULTS / "tables" / "study_design.xlsx"
-    for name in ("age_tests.xlsx", "public_antigen.xlsx", "figure_stat_annotations.csv"):
-        files[f"tables/{name}"] = RESULTS / "tables" / name
+            files[f"tables/{row['workbook']}"] = results / "tables" / row["workbook"]
+            files[f"figures/{row['pdf']}"] = results / "figures" / row["pdf"]
+            files[f"figures/{row['png']}"] = results / "figures" / row["png"]
+    files["tables/figure_table_map.xlsx"] = results / "tables" / "figure_table_map.xlsx"
+    files["tables/study_design.xlsx"] = results / "tables" / "study_design.xlsx"
+    for name in ("age_tests.xlsx", "igg_plasma.xlsx", "igg_plasma_v.xlsx", "figure_stat_annotations.csv"):
+        source = results / "tables" / name
+        if source.exists():
+            files[f"tables/{name}"] = source
     for name in (
         "bcr_cells.xlsx",
         "cell_flow.xlsx",
@@ -109,10 +111,13 @@ def build():
         "umap_display_audit.csv",
         "validation_checks.csv",
     ):
-        files[f"tables/{name}"] = RESULTS / "tables" / name
-    files["sessionInfo.txt"] = RESULTS / "rdata" / "sessionInfo.txt"
-    files["rdata/bcr_cells.rds"] = RESULTS / "rdata" / "bcr_cells.rds"
-    for name in ("bcr_skull_bm.qmd", "bcr_helpers.R", "bcr_theme.scss", "check_bcr_analysis.R",
+        source = results / "tables" / name
+        if source.exists():
+            files[f"tables/{name}"] = source
+    files["sessionInfo.txt"] = results / "rdata" / "sessionInfo.txt"
+    files["rdata/bcr_cells.rds"] = results / "rdata" / "bcr_cells.rds"
+    files["source/bcr_skull_bm.qmd"] = source_qmd
+    for name in ("bcr_helpers.R", "bcr_theme.scss", "check_bcr_analysis.R",
                  "package_bcr_delivery.py", "sample_info.csv", "cluster_lineage.csv"):
         files[f"source/{name}"] = ROOT / "codes" / name
     files["CHANGELOG.md"] = ROOT / "CHANGELOG.md"
@@ -141,17 +146,17 @@ def build():
     if legacy & set(files):
         raise ValueError(f"Legacy files entered the archive: {sorted(legacy & set(files))}")
 
-    archive = ROOT / "results" / "bcr_delivery.zip"
+    archive = Path(zip_path)
     pending = archive.with_suffix(".zip.tmp")
-    readme = """打开 bcr_skull_bm.html 阅读报告，保留 tables/ 与 figures/ 目录，正文中的下载链接才能打开。
+    readme = f"""打开 bcr_skull_bm.html 阅读报告，保留 tables/ 与 figures/ 目录，正文中的下载链接才能打开。
 tables/fig_*.xlsx：逐图作图数据、statistics、dictionary 和 parameters。
 tables/figure_table_map.xlsx / figure_table_map.csv：图与 PDF、PNG、逐图工作簿的对应关系。
-tables/age_tests.xlsx：供体层面年龄组检验（Shapiro α=0.05，正态则 Welch t，否则 Wilcoxon；含同 family 参考 BH）。
-tables/public_antigen.xlsx：CoV-AbDab 与 IEDB 查询 QC、按库汇总及公共克隆配对。
+tables/age_tests.xlsx：供体层面年龄组检验（Shapiro α=0.05，正态则 Welch t，否则 Wilcoxon；含同 family 参考 BH）。{exclusion_note}
+tables/igg_plasma.xlsx：IgG 浆细胞的扩增、多样性，以及 IgG 占浆细胞的比例。
 tables/figure_stat_annotations.csv：图中原始 P、参考 BH 与完整检验表对应关系。
 tables/bcr_cells.xlsx、clone_metrics.xlsx、clone_size_bins.xlsx、top_clones.xlsx：细胞与克隆层汇总。
 tables/diversity.xlsx、startrac.xlsx、recovery.xlsx、cell_flow.xlsx、isotype.xlsx、ighv_usage.xlsx、shm.xlsx：各模块完整结果表。
-tables/clone_composition_donuts.xlsx、validation_checks.csv、umap_display_audit.csv：甜甜圈作图数据、验证与 UMAP 审计。
+tables/clone_composition_donuts.xlsx、validation_checks.csv、umap_display_audit.csv：甜甜圈作图数据、本版本结果目录生成的验证表，以及 UMAP 审计。validation_checks.csv 不从其他版本复制。
 tables/file_manifest.xlsx：本地 results/bcr/ 结果文件清单（含未入包路径，非 ZIP 专用清单）；figures/：全部现行 PDF 与 PNG；rdata/bcr_cells.rds：带 BCR 注释的细胞表（R 对象）。
 sessionInfo.txt：运行环境；source/：QMD 与复现辅助脚本。不含完整 Seurat 对象与 SHM 原始缓存，复现仍需项目 data/。
 年龄组比较为探索性结果，诊断组成差异限制了对衰老效应的解释。
@@ -171,11 +176,95 @@ sessionInfo.txt：运行环境；source/：QMD 与复现辅助脚本。不含完
     finally:
         if pending.exists():
             pending.unlink()
-    sync_pages_docs(archive, report)
+    sync_pages_docs(archive, report, pages_dir)
     print(f"{len(audit.plots)} distinct figures; {audit.folds} collapsed code blocks; no warning/error output.")
     print(f"Verified {len(local_links)} local download links. Archive: {archive}")
-    print(f"GitHub Pages content: {ROOT / 'docs'}")
+    print(f"GitHub Pages content: {pages_dir}")
+
+
+def package_two():
+    build(
+        ROOT / "codes" / "bcr_skull_bm.html",
+        ROOT / "results" / "bcr",
+        ROOT / "docs" / "exclude_o6_o11",
+        ROOT / "results" / "bcr_delivery.zip",
+        ROOT / "codes" / "bcr_skull_bm.qmd",
+        (("../results/bcr/tables/", "tables/"), ("../results/bcr/figures/", "figures/")),
+        "本版已剔除 O6 与 O11。",
+    )
+
+
+def package_original():
+    build(
+        ROOT / "archive" / "bcr_delivered_20261119" / "bcr_skull_bm.html",
+        ROOT / "archive" / "bcr_delivered_20261119" / "render_out",
+        ROOT / "docs",
+        ROOT / "archive" / "bcr_delivered_20261119" / "bcr_delivery.zip",
+        ROOT / "archive" / "bcr_delivered_20261119" / "bcr_skull_bm.qmd",
+        (("render_out/tables/", "tables/"), ("render_out/figures/", "figures/")),
+        "本版为最初 21 人队列。",
+    )
+    # Keep the later delivery folders that live beside the original site root.
+    kept = ROOT / "docs"
+    for name in ("exclude_o6_o11", "exclude_o6_o8_o11"):
+        if not (kept / name).exists():
+            raise SystemExit(f"Refusing to leave Pages without {name}")
+
+
+def sync_pages_docs(archive: Path, report: str, docs: Path) -> Path:
+    preserve = {}
+    if docs == ROOT / "docs":
+        for name in ("exclude_o6_o11", "exclude_o6_o8_o11"):
+            src = docs / name
+            if src.exists():
+                dest = Path("/tmp") / f"skull_pages_{name}"
+                if dest.exists():
+                    shutil.rmtree(dest)
+                shutil.copytree(src, dest)
+                preserve[name] = dest
+    if docs.exists() and docs != ROOT / "docs":
+        shutil.rmtree(docs)
+    docs.mkdir(parents=True, exist_ok=True)
+    if docs == ROOT / "docs":
+        for child in list(docs.iterdir()):
+            if child.name in preserve:
+                continue
+            if child.is_dir():
+                shutil.rmtree(child)
+            else:
+                child.unlink()
+    with ZipFile(archive) as zf:
+        for name in zf.namelist():
+            if name.endswith("/") or name == "bcr_skull_bm.html":
+                continue
+            zf.extract(name, docs)
+    index_html = re.sub(r"(<body[^>]*>)", r"\1\n" + DOWNLOAD_BANNER, report, count=1)
+    (docs / "index.html").write_text(index_html)
+    shutil.copy2(archive, docs / "bcr_delivery.zip")
+    for name, src in preserve.items():
+        dest = docs / name
+        if dest.exists():
+            shutil.rmtree(dest)
+        shutil.move(str(src), str(dest))
+    return docs
+
+
+def package_three():
+    build(
+        ROOT / "archive" / "bcr_exclude_O6_O8_O11" / "bcr_skull_bm.html",
+        ROOT / "archive" / "bcr_exclude_O6_O8_O11" / "render_out",
+        ROOT / "docs" / "exclude_o6_o8_o11",
+        ROOT / "archive" / "bcr_exclude_O6_O8_O11" / "bcr_delivery.zip",
+        ROOT / "archive" / "bcr_exclude_O6_O8_O11" / "bcr_skull_bm.qmd",
+        (("render_out/tables/", "tables/"), ("render_out/figures/", "figures/")),
+        "本版已剔除 O6、O8 与 O11。",
+    )
 
 
 if __name__ == "__main__":
-    build()
+    if "--three" in sys.argv:
+        package_three()
+    elif "--original" in sys.argv:
+        package_original()
+    else:
+        package_two()

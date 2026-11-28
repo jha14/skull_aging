@@ -88,8 +88,10 @@ def build(report_html, results, pages_dir, zip_path, source_qmd, link_replacemen
             files[f"figures/{row['png']}"] = results / "figures" / row["png"]
     files["tables/figure_table_map.xlsx"] = results / "tables" / "figure_table_map.xlsx"
     files["tables/study_design.xlsx"] = results / "tables" / "study_design.xlsx"
-    for name in ("age_tests.xlsx", "igg_plasma.xlsx", "figure_stat_annotations.csv"):
-        files[f"tables/{name}"] = results / "tables" / name
+    for name in ("age_tests.xlsx", "igg_plasma.xlsx", "igg_plasma_v.xlsx", "figure_stat_annotations.csv"):
+        source = results / "tables" / name
+        if source.exists():
+            files[f"tables/{name}"] = source
     for name in (
         "bcr_cells.xlsx",
         "cell_flow.xlsx",
@@ -192,6 +194,61 @@ def package_two():
     )
 
 
+def package_original():
+    build(
+        ROOT / "archive" / "bcr_delivered_20261119" / "bcr_skull_bm.html",
+        ROOT / "archive" / "bcr_delivered_20261119" / "render_out",
+        ROOT / "docs",
+        ROOT / "archive" / "bcr_delivered_20261119" / "bcr_delivery.zip",
+        ROOT / "archive" / "bcr_delivered_20261119" / "bcr_skull_bm.qmd",
+        (("render_out/tables/", "tables/"), ("render_out/figures/", "figures/")),
+        "本版为最初 21 人队列。",
+    )
+    # Keep the later delivery folders that live beside the original site root.
+    kept = ROOT / "docs"
+    for name in ("exclude_o6_o11", "exclude_o6_o8_o11"):
+        if not (kept / name).exists():
+            raise SystemExit(f"Refusing to leave Pages without {name}")
+
+
+def sync_pages_docs(archive: Path, report: str, docs: Path) -> Path:
+    preserve = {}
+    if docs == ROOT / "docs":
+        for name in ("exclude_o6_o11", "exclude_o6_o8_o11"):
+            src = docs / name
+            if src.exists():
+                dest = Path("/tmp") / f"skull_pages_{name}"
+                if dest.exists():
+                    shutil.rmtree(dest)
+                shutil.copytree(src, dest)
+                preserve[name] = dest
+    if docs.exists() and docs != ROOT / "docs":
+        shutil.rmtree(docs)
+    docs.mkdir(parents=True, exist_ok=True)
+    if docs == ROOT / "docs":
+        for child in list(docs.iterdir()):
+            if child.name in preserve:
+                continue
+            if child.is_dir():
+                shutil.rmtree(child)
+            else:
+                child.unlink()
+    with ZipFile(archive) as zf:
+        for name in zf.namelist():
+            if name.endswith("/") or name == "bcr_skull_bm.html":
+                continue
+            zf.extract(name, docs)
+    index_html = re.sub(r"(<body[^>]*>)", r"\1\n" + DOWNLOAD_BANNER, report, count=1)
+    (docs / "index.html").write_text(index_html)
+    shutil.copy2(archive, docs / "bcr_delivery.zip")
+    for name, src in preserve.items():
+        dest = docs / name
+        if dest.exists():
+            shutil.rmtree(dest)
+        shutil.move(str(src), str(dest))
+    return docs
+
+
 def package_three():
     build(
         ROOT / "archive" / "bcr_exclude_O6_O8_O11" / "bcr_skull_bm.html",
@@ -207,5 +264,7 @@ def package_three():
 if __name__ == "__main__":
     if "--three" in sys.argv:
         package_three()
+    elif "--original" in sys.argv:
+        package_original()
     else:
         package_two()

@@ -39,7 +39,7 @@ sampling-depth tests are not part of the delivered comparison,TRUE
 no test exceeds the available donor count,TRUE
 top-clone table contains one row per donor and clone,TRUE
 truncated CoV-AbDab copy remains unusable,TRUE
-completed antigen search records a hit count,TRUE
+full cohort keeps every listed donor,TRUE
 every analysed cell is present in the saved Seurat object,TRUE
 saved Seurat metadata agrees: contig_id,TRUE
 saved Seurat metadata agrees: isotype,TRUE
@@ -50,8 +50,6 @@ saved Seurat metadata agrees: clone_size,TRUE
 saved Seurat metadata agrees: subtype_clone_size,TRUE
 saved Seurat metadata agrees: isotype_clone_size,TRUE
 saved Seurat metadata agrees: mu_percent,TRUE
-saved Seurat metadata agrees: public_exact,TRUE
-saved Seurat metadata agrees: public_near,TRUE
 the SHM caches were preserved,TRUE
 every donor clone-size bar sums to 100,TRUE
 WLR220308_Z keeps the clone-size 1 segment,TRUE
@@ -83,3 +81,5 @@ figure workbook contains its displayed tests: 17,TRUE
 figure workbook contains its displayed tests: 22,TRUE
 figure workbook contains its displayed tests: 23,TRUE
 figure workbook contains its displayed tests: 24,TRUE
+figure workbook contains its displayed tests: 28,TRUE
+figure workbook contains its displayed tests: 29,TRUE

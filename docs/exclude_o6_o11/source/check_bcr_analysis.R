@@ -113,8 +113,15 @@ top <- openxlsx::read.xlsx(file.path(results_dir, "tables/top_clones.xlsx"))
 check("top-clone table contains one row per donor and clone", !anyDuplicated(top[c("sample_id", "clone_id")]))
 check("truncated CoV-AbDab copy remains unusable",
   is.null(read_local_antigen_reference("data/reference/provenance/CoV-AbDab_080224.truncated.csv")$data))
-check("excluded donors are absent from the analysed cells",
-  !any(a$sample_id %in% c("LXY_SkullBM_240412", "ZFR_SkullBM_240315")))
+design_path <- file.path(results_dir, "tables/study_design.xlsx")
+design_sheets <- openxlsx::getSheetNames(design_path)
+if ("excluded" %in% design_sheets) {
+  excluded_ids <- openxlsx::read.xlsx(design_path, sheet = "excluded")$sample_id
+  check("excluded donors are absent from the analysed cells",
+    length(excluded_ids) > 0 && !any(a$sample_id %in% excluded_ids))
+} else {
+  check("full cohort keeps every listed donor", all(si$sample_id %in% a$sample_id))
+}
 obj <- readRDS(file.path(results_dir, "rdata/b_lineage_with_bcr.rds"))
 idx <- match(a$barcode, colnames(obj))
 check("every analysed cell is present in the saved Seurat object", !anyNA(idx))
@@ -159,9 +166,12 @@ check("UMAP panels share limits and keep circular points",
 ann <- readr::read_csv(file.path(results_dir, "tables/figure_stat_annotations.csv"),
   col_types = readr::cols(.default = readr::col_guess(), figure_id = readr::col_character()))
 ann_idx <- match(ann$test_id, tests$test_id)
+base_figures <- c("05", "05s", "06", "07", "07s", "09", "10", "11", "12", "13", "14", "16", "17", "22", "23", "24")
+present_extra <- intersect(c("25", "26", "27", "28", "29"), unique(ann$figure_id))
 check("all comparative figures have traceable test annotations",
   !anyNA(ann_idx) && !anyDuplicated(ann[c("figure_id", "test_id")]) &&
-    setequal(unique(ann$figure_id), c("05", "05s", "06", "07", "07s", "09", "10", "11", "12", "13", "14", "16", "17", "22", "23", "24", "25", "26", "27")))
+    all(c("28", "29") %in% unique(ann$figure_id)) &&
+    setequal(unique(ann$figure_id), c(base_figures, present_extra)))
 tested <- !is.na(tests$p_value)
 check("age tests record the chosen test method",
   all(tests$test_method[tested] %in% c("Welch t-test", "Wilcoxon")))

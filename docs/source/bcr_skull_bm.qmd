@@ -1332,6 +1332,10 @@ antigen_by_db
 ```
 
 
+## IgG 浆细胞
+
+这一节只看抗体类型为 IgG 的浆细胞。下面两张图分别看最大 10 个克隆占了多少细胞，以及这些细胞的 IGHV 使用频率。
+
 ```{r}
 #| label: igg-plasma-top10
 #| fig-width: 1.85
@@ -1367,7 +1371,7 @@ write_fig_xlsx("28_igg_plasma_top10", igg_top, statistics_from_plot(p_igg_top),
   tibble(item = "min_subtype_cells", value = min_subtype_cells))
 ```
 
-图 28. 每个点是一位供者。这里只看 IgG 浆细胞。纵轴是该供者最大的 10 个克隆占这些细胞的百分比。百分比高，表示少数克隆占了较多细胞。年轻组中位数是 `r pct1(test_row("IGHG Plasma; top10_frac")$median_young)`，年老组是 `r pct1(test_row("IGHG Plasma; top10_frac")$median_old)`（p = `r p3(test_row("IGHG Plasma; top10_frac")$p_value)`）。这不是图 13 的全库结果。
+图 28. 每个点是一位供者，只看 IgG 浆细胞。纵轴是最大的 10 个克隆占这些细胞的百分比。如果一位供者只有 10 个能定义克隆的 IgG 浆细胞，即使每个细胞各属一个克隆，Top 10 占比也是 100%，不能据此判断扩增更强。年轻组中位数是 `r pct1(test_row("IGHG Plasma; top10_frac")$median_young)`，年老组是 `r pct1(test_row("IGHG Plasma; top10_frac")$median_old)`（p = `r p3(test_row("IGHG Plasma; top10_frac")$p_value)`）。这不是图 13 的全库结果。
 
 ```{r}
 #| label: igg-plasma-vgene
@@ -1402,7 +1406,7 @@ p_igg_v <- igg_v_cell %>%
   geom_point(position = position_jitterdodge(jitter.width = 0.1, dodge.width = 0.8), size = 1, alpha = 0.75) +
   scale_fill_manual(values = age_col) +
   coord_flip() + theme_bcr(8) +
-  labs(x = NULL, y = "IgG plasma cells (%)", title = "IGHV in IgG plasma")
+  labs(x = NULL, y = "Cell-weighted frequency (%)", title = "IGHV usage frequency")
 igg_v_annotation <- tibble(
   v_gene = factor(igg_v_genes, levels = rev(igg_v_genes)),
   family = "igg_plasma_v",
@@ -1429,7 +1433,7 @@ write_fig_xlsx("29_igg_plasma_ighv", igg_v_cell %>% filter(v_gene %in% igg_v_gen
 write_xlsx(list(cell_weighted = igg_v_cell), "igg_plasma_v")
 ```
 
-图 29. 每个点是一位供者，只统计 IgG 浆细胞。横轴是该 V 基因占这位供者 IgG 浆细胞的百分比。图上是平均使用率至少 1%、并且最高的 15 个基因。括号是年轻组和年老组这一个基因的原始 p。它和图 10 的全库 V 基因使用不是同一张图。
+图 29. 每个点是一位供者。这里按细胞计数，看每个 IGHV 占该供者 IgG 浆细胞的百分比，也就是 IGHV 使用频率。图上是平均频率至少 1% 的前 15 个基因，基因名右侧是该项原始 p。按 `igg_plasma_v` 做 BH 校正后，本版没有基因低于 0.05；另外两份交付版也同样没有。它和图 10 的全库使用频率不是同一张图。
 
 ```{r}
 #| label: finalize-tests
@@ -1823,7 +1827,7 @@ figure_index <- tibble(
             "Top 10 克隆占比", "Shannon", "同种型内扩增", "Plasma 分同种型 SHM",
             "供者克隆大小", "年轻年老克隆大小", "亚型克隆大小甜甜圈", "扩增细胞亚型甜甜圈",
             "Gini-Simpson", "STARTRAC 扩增", "STARTRAC 亚型间共享",
-            "IgG 浆细胞 Top 10", "IgG 浆细胞 IGHV"),
+            "IgG 浆细胞 Top 10", "IgG 浆细胞 IGHV 使用频率"),
   workbook = paste0("fig_", c(
     "01_markers", "02_umap", "02b_umap_age", "02b_umap_clone", "02b_umap_isotype", "02b_umap_shm",
     "03_recovery", "04_composition", "05_subtype_fraction", "05s_subtype_fraction",
